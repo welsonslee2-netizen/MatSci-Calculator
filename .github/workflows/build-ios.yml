@@ -5,9 +5,6 @@ on:
     branches: [main]
   workflow_dispatch:
 
-env:
-  IOS_DEPLOYMENT_TARGET: "18.0"
-
 jobs:
   build-ios:
     runs-on: macos-latest
@@ -36,23 +33,29 @@ jobs:
       - name: Add iOS platform
         run: npx cap add ios
 
-      - name: Fix iOS deployment target in Podfile
+      - name: Rewrite Podfile with deployment target 15.0
         run: |
           cd ios/App
-          # Rewrite Podfile platform line
-          sed -i '' 's/platform :ios.*/platform :ios, "'"$IOS_DEPLOYMENT_TARGET"'"/' Podfile
-          # Force ALL pods to use this deployment target via post_install
-          cat >> Podfile << 'RUBY_EOF'
+          echo "=== Original Podfile ==="
+          cat Podfile
 
+          # Completely replace Podfile to guarantee correct platform
+          ruby -e '
+            content = File.read("Podfile")
+            # Replace any platform line with ios 15.0
+            content.sub!(/^platform\s*:ios\s*,\s*["'\'']?[\d.]+["'\'']?/, "platform :ios, \"15.0\"")
+            # Ensure assertDeploymentTarget is called in post_install
+            unless content.include?("assertDeploymentTarget")
+              content += %Q[
           post_install do |installer|
-            installer.pods_project.targets.each do |target|
-              target.build_configurations.each do |config|
-                config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = ENV['IOS_DEPLOYMENT_TARGET']
-              end
-            end
+            assertDeploymentTarget(installer)
           end
-          RUBY_EOF
-          echo "--- Podfile content ---"
+          ]
+            end
+            File.write("Podfile", content)
+          '
+
+          echo "=== Fixed Podfile ==="
           cat Podfile
 
       - name: Generate iOS icons from source image
@@ -61,10 +64,7 @@ jobs:
       - name: Install CocoaPods dependencies
         run: cd ios/App && pod install
 
-      - name: Sync Capacitor
-        run: npx cap sync ios
-
-      - name: Build for generic iOS device (unsigned .app)
+      - name: Build unsigned .app
         run: |
           cd ios/App
           xcodebuild -workspace App.xcworkspace \
@@ -72,12 +72,11 @@ jobs:
             -configuration Release \
             -sdk iphoneos \
             -derivedDataPath build \
-            IPHONEOS_DEPLOYMENT_TARGET=$IOS_DEPLOYMENT_TARGET \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
 
-      - name: Package .app into .ipa
+      - name: Package into .ipa
         run: |
           cd ios/App/build/Build/Products/Release-iphoneos
           mkdir -p Payload
