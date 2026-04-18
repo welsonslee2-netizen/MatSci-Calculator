@@ -96,6 +96,35 @@ jobs:
             VALID_ARCHS="arm64" \
             2>&1 | tee build.log
 
+          # === Fix: Ensure Info.plist exists in .app bundle ===
+          APP_BUNDLE="build/Build/Products/Release-iphoneos/App.app"
+          if [ ! -f "$APP_BUNDLE/Info.plist" ]; then
+            echo "⚠️ Info.plist missing, copying from project source..."
+            # Try multiple possible locations
+            for SRC in \
+              "App/App/Info.plist" \
+              "App/Info.plist" \
+              "build/Build/Intermediates.noindex/App.build/Release-iphoneos/App.build/Info.plist"; do
+              if [ -f "$SRC" ]; then
+                echo "Found Info.plist at: $SRC"
+                cp "$SRC" "$APP_BUNDLE/Info.plist"
+                echo "✅ Info.plist copied"
+                break
+              fi
+            done
+
+            # If still missing, check if it's a compiled plist (binary)
+            if [ ! -f "$APP_BUNDLE/Info.plist" ]; then
+              echo "Searching for Info.plist in build directory..."
+              find build -name "Info.plist" -path "*App.build*" 2>/dev/null | head -5
+              # Try to generate from project settings
+              plutil -create "$APP_BUNDLE/Info.plist" 2>/dev/null || true
+            fi
+          fi
+
+          echo "=== App bundle contents ==="
+          ls -la "$APP_BUNDLE/"
+
       - name: Package into .ipa
         run: |
           PRODUCTS_DIR="ios/App/build/Build/Products/Release-iphoneos"
