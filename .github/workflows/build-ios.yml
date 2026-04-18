@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+env:
+  IOS_DEPLOYMENT_TARGET: "18.0"
+
 jobs:
   build-ios:
     runs-on: macos-latest
@@ -36,8 +39,21 @@ jobs:
       - name: Fix iOS deployment target in Podfile
         run: |
           cd ios/App
-          # Replace the deployment target to match what Capacitor 8 requires
-          sed -i '' 's/platform :ios.*/platform :ios, "15.0"/' Podfile
+          # Rewrite Podfile platform line
+          sed -i '' 's/platform :ios.*/platform :ios, "'"$IOS_DEPLOYMENT_TARGET"'"/' Podfile
+          # Force ALL pods to use this deployment target via post_install
+          cat >> Podfile << 'RUBY_EOF'
+
+          post_install do |installer|
+            installer.pods_project.targets.each do |target|
+              target.build_configurations.each do |config|
+                config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = ENV['IOS_DEPLOYMENT_TARGET']
+              end
+            end
+          end
+          RUBY_EOF
+          echo "--- Podfile content ---"
+          cat Podfile
 
       - name: Generate iOS icons from source image
         run: npx capacitor-assets generate --ios
@@ -56,7 +72,7 @@ jobs:
             -configuration Release \
             -sdk iphoneos \
             -derivedDataPath build \
-            IPHONEOS_DEPLOYMENT_TARGET=15.0 \
+            IPHONEOS_DEPLOYMENT_TARGET=$IOS_DEPLOYMENT_TARGET \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
