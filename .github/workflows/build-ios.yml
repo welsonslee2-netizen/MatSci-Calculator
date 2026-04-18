@@ -22,7 +22,7 @@ jobs:
         run: npm ci
 
       - name: Install Capacitor iOS platform
-        run: npm install @capacitor/ios --save-dev
+        run: npm install @capacitor/ios@8 --save-dev
 
       - name: Install @capacitor/assets for icon generation
         run: npm install @capacitor/assets --save-dev
@@ -33,8 +33,17 @@ jobs:
       - name: Add iOS platform
         run: npx cap add ios
 
+      - name: Fix iOS deployment target in Podfile
+        run: |
+          cd ios/App
+          # Replace the deployment target to match what Capacitor 8 requires
+          sed -i '' 's/platform :ios.*/platform :ios, "15.0"/' Podfile
+
       - name: Generate iOS icons from source image
         run: npx capacitor-assets generate --ios
+
+      - name: Install CocoaPods dependencies
+        run: cd ios/App && pod install
 
       - name: Sync Capacitor
         run: npx cap sync ios
@@ -47,6 +56,7 @@ jobs:
             -configuration Release \
             -sdk iphoneos \
             -derivedDataPath build \
+            IPHONEOS_DEPLOYMENT_TARGET=15.0 \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
