@@ -21,11 +21,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install @capacitor/ios
-        run: npm install @capacitor/ios
+      - name: Install @capacitor/ios and @nicepkg/capacitor-assets
+        run: npm install @capacitor/ios @nicepkg/capacitor-assets --save-dev
 
       - name: Build web assets
         run: npm run build
+
+      - name: Generate iOS icons from source image
+        run: npx capacitor-assets generate --icon-background-type solid --icon-background-color "#1A73E8" --ios
 
       - name: Add iOS platform
         run: npx cap add ios
@@ -45,7 +48,7 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
 
-      - name: Package .app into .ipa (manual zip method)
+      - name: Package .app into .ipa
         run: |
           cd ios/App/build/Build/Products/Release-iphoneos
           mkdir -p Payload

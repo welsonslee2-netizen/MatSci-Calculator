@@ -2,6 +2,7 @@
   "appId": "com.matsci.calculator",
   "appName": "MatSci Calculator",
   "webDir": "dist",
+  "webResourcesDir": "resources",
   "server": {
     "androidScheme": "https",
     "iosScheme": "https"

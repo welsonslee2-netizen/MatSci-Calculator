@@ -20,6 +20,9 @@ Thumbs.db
 .env
 .env.local
 
+# Original icon (large, not needed in repo)
+1.png
+
 # Temp
 *.log
 _playwright-cli/
