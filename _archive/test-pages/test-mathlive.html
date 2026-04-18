@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MathLive 测试页面</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    
+    .test-container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      color: #1f5e87;
+      margin-bottom: 20px;
+    }
+    
+    .status {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .status.warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+    
+    math-field {
+      display: block;
+      width: 100%;
+      min-height: 100px;
+      padding: 15px;
+      margin: 20px 0;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      background: white;
+      cursor: text;
+    }
+    
+    math-field:focus {
+      border-color: #1f5e87;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(31, 94, 135, 0.2);
+    }
+    
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
+      background: #1f5e87;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    button:hover {
+      background: #164a6b;
+    }
+    
+    .log {
+      background: #f8f9fa;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .log-entry {
+      margin: 5px 0;
+      padding: 3px 0;
+      border-bottom: 1px solid #eee;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>🧪 MathLive 输入测试</h1>
+    
+    <div id="status"></div>
+    
+    <h2>测试区域</h2>
+    <p>点击下方输入框，尝试键盘输入：</p>
+    
+    <math-field 
+      id="test-field" 
+      virtual-keyboard-mode="off"
+      placeholder="点击这里开始输入公式..."
+    >
+      x^2 + y^2 = z^2
+    </math-field>
+    
+    <div>
+      <button onclick="testFocus()">测试焦点</button>
+      <button onclick="testInsert()">测试插入</button>
+      <button onclick="testGetValue()">获取值</button>
+      <button onclick="clearLog()">清除日志</button>
+    </div>
+    
+    <h3>操作日志</h3>
+    <div id="log" class="log"></div>
+  </div>
+
+  <!-- 加载 MathLive -->
+  <script defer src="https://unpkg.com/mathlive@0.98.5/dist/mathlive.min.js"></script>
+  
+  <script>
+    const logDiv = document.getElementById('log');
+    const statusDiv = document.getElementById('status');
+    
+    function addLog(message, type = 'info') {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      const timestamp = new Date().toLocaleTimeString();
+      entry.textContent = `[${timestamp}] ${message}`;
+      
+      if (type === 'error') {
+        entry.style.color = '#dc3545';
+      } else if (type === 'success') {
+        entry.style.color = '#28a745';
+      } else if (type === 'warning') {
+        entry.style.color = '#ffc107';
+      }
+      
+      logDiv.appendChild(entry);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+    
+    function updateStatus(message, type) {
+      statusDiv.className = `status ${type}`;
+      statusDiv.textContent = message;
+    }
+    
+    function clearLog() {
+      logDiv.innerHTML = '';
+      addLog('日志已清除');
+    }
+    
+    // 检查 MathLive 加载状态
+    function checkMathLive() {
+      if (window.MathLive) {
+        addLog('✅ MathLive 库已加载', 'success');
+        updateStatus('MathLive 已成功加载！', 'success');
+        return true;
+      } else {
+        addLog('❌ MathLive 库未加载', 'error');
+        updateStatus('MathLive 加载失败，请检查网络连接', 'error');
+        return false;
+      }
+    }
+    
+    // 等待 MathLive 加载
+    function waitForMathLive(retryCount = 0) {
+      if (window.MathLive && customElements.get('math-field')) {
+        addLog('✅ MathLive 和 math-field 元素已就绪', 'success');
+        updateStatus('所有组件已就绪，可以开始测试！', 'success');
+        
+        // 自动聚焦到输入框
+        setTimeout(() => {
+          const field = document.getElementById('test-field');
+          if (field) {
+            field.focus();
+            addLog('✅ 自动聚焦成功', 'success');
+          }
+        }, 500);
+        
+        return;
+      }
+      
+      if (retryCount < 20) {
+        addLog(`⏳ 等待 MathLive 加载... (${retryCount + 1}/20)`, 'warning');
+        setTimeout(() => waitForMathLive(retryCount + 1), 200);
+      } else {
+        addLog('❌ MathLive 加载超时', 'error');
+        updateStatus('MathLive 加载超时，请刷新页面重试', 'error');
+      }
+    }
+    
+    // 测试焦点
+    function testFocus() {
+      const field = document.getElementById('test-field');
+      if (!field) {
+        addLog('❌ 找不到 test-field 元素', 'error');
+        return;
+      }
+      
+      try {
+        field.focus();
+        const hasFocus = document.activeElement === field;
+        addLog(`焦点测试: ${hasFocus ? '✅ 成功' : '❌ 失败'}`, hasFocus ? 'success' : 'error');
+      } catch (error) {
+        addLog(`焦点测试失败: ${error.message}`, 'error');
+      }
+    }
+    
+    // 测试插入
+    function testInsert() {
+      const field = document.getElementById('test-field');
+      if (!field) {
+        addLog('❌ 找不到 test-field 元素', 'error');
+        return;
+      }
+      
+      try {
+        field.focus();
+        field.executeCommand('insert', '\\alpha + \\beta');
+        addLog('✅ 插入成功: α + β', 'success');
+        addLog(`当前值: ${field.getValue()}`, 'info');
+      } catch (error) {
+        addLog(`插入失败: ${error.message}`, 'error');
+      }
+    }
+    
+    // 获取值
+    function testGetValue() {
+      const field = document.getElementById('test-field');
+      if (!field) {
+        addLog('❌ 找不到 test-field 元素', 'error');
+        return;
+      }
+      
+      try {
+        const value = field.getValue();
+        addLog(`当前 LaTeX 值: ${value || '(空)'}`, 'info');
+      } catch (error) {
+        addLog(`获取值失败: ${error.message}`, 'error');
+      }
+    }
+    
+    // 页面加载完成后开始测试
+    window.addEventListener('load', function() {
+      addLog('🚀 页面加载完成', 'info');
+      
+      if (checkMathLive()) {
+        waitForMathLive();
+      }
+    });
+    
+    // 监听 math-field 事件
+    document.addEventListener('DOMContentLoaded', function() {
+      const field = document.getElementById('test-field');
+      if (field) {
+        field.addEventListener('click', function() {
+          addLog('👆 输入框被点击', 'info');
+        });
+        
+        field.addEventListener('focus', function() {
+          addLog('✅ 输入框获得焦点', 'success');
+        });
+        
+        field.addEventListener('blur', function() {
+          addLog('❌ 输入框失去焦点', 'warning');
+        });
+        
+        field.addEventListener('input', function() {
+          addLog(`⌨️ 输入变化: ${this.getValue()}`, 'info');
+        });
+        
+        field.addEventListener('keydown', function(e) {
+          addLog(`🔘 按键: ${e.key} (code: ${e.code})`, 'info');
+        });
+      }
+    });
+  </script>
+</body>
+</html>

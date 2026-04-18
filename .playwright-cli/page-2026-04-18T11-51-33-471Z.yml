@@ -1,0 +1,121 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: MS
+        - generic [ref=e6]:
+          - paragraph [ref=e7]: Scientific Prototype
+          - heading "MatSci Calculator Lab" [level=1] [ref=e8]
+          - paragraph [ref=e9]: Materials computation, reference data, and strengthening analysis in one local dashboard.
+      - generic [ref=e10]:
+        - generic [ref=e11]: Language
+        - group "Language" [ref=e12]:
+          - button "EN" [ref=e13] [cursor=pointer]
+          - button "中文" [ref=e14] [cursor=pointer]
+      - generic [ref=e15]:
+        - paragraph [ref=e16]: Workspaces
+        - navigation "Primary navigation" [ref=e17]:
+          - button "Home" [ref=e18] [cursor=pointer]
+          - button "Classic Calculator" [ref=e19] [cursor=pointer]
+          - button "Scientific Calculator" [ref=e20] [cursor=pointer]
+          - button "Function Analysis" [ref=e21] [cursor=pointer]
+          - button "Constants Library" [ref=e22] [cursor=pointer]
+          - button "Elements Library" [ref=e23] [cursor=pointer]
+          - button "Materials Strengthening" [ref=e24] [cursor=pointer]
+          - button "Visual Lab" [ref=e25] [cursor=pointer]
+      - generic [ref=e26]:
+        - generic [ref=e27]: Prototype v1
+        - paragraph [ref=e28]: Built with plain HTML, CSS, and JavaScript for lightweight local use with no backend.
+    - main [ref=e29]:
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - generic [ref=e32]:
+            - paragraph [ref=e33]: Materials Engineering Workspace
+            - heading "Run calculations, inspect property data, and explore strengthening models in a single scientific interface." [level=2] [ref=e34]
+            - paragraph [ref=e35]: This prototype is tuned for quick what-if analysis, classroom explanation, and early-stage research workflows. It balances calculator utility with materials-specific teaching visuals.
+            - generic [ref=e36]:
+              - link "Start Calculating" [ref=e37] [cursor=pointer]:
+                - /url: "#scientific-calculator"
+              - link "Open Strengthening Models" [ref=e38] [cursor=pointer]:
+                - /url: "#strengthening"
+          - generic [ref=e39]:
+            - generic [ref=e40]:
+              - generic [ref=e41]:
+                - generic [ref=e42]: "7"
+                - text: Main modules
+              - generic [ref=e43]:
+                - generic [ref=e44]: 10+
+                - text: Constants ready
+              - generic [ref=e45]:
+                - generic [ref=e46]: "18"
+                - text: Elements seeded
+              - generic [ref=e47]:
+                - generic [ref=e48]: "4"
+                - text: Strengthening models
+            - generic [ref=e50]:
+              - generic [ref=e51]:
+                - heading "Research Scratchpad" [level=3] [ref=e52]
+                - paragraph [ref=e53]: Selections from the constants and elements libraries land here for future calculator workflows.
+              - button "Clear" [ref=e54] [cursor=pointer]
+        - generic [ref=e56]:
+          - paragraph [ref=e57]: Modules
+          - heading "Core tools in the prototype" [level=2] [ref=e58]
+        - generic [ref=e59]:
+          - article [ref=e60]:
+            - generic [ref=e61]: "01"
+            - heading "Classic Calculator" [level=3] [ref=e62]
+            - paragraph [ref=e63]: Use the symbol-first keypad with DEG/RAD switching for quick scientific arithmetic on phones and desktops.
+            - link "Open classic panel" [ref=e64] [cursor=pointer]:
+              - /url: "#classic-calculator"
+          - article [ref=e65]:
+            - generic [ref=e66]: "02"
+            - heading "Scientific Calculator" [level=3] [ref=e67]
+            - paragraph [ref=e68]: Evaluate expressions, run derivatives and integrations, solve roots, and plot one-variable functions.
+            - link "Open module" [ref=e69] [cursor=pointer]:
+              - /url: "#scientific-calculator"
+          - article [ref=e70]:
+            - generic [ref=e71]: "03"
+            - heading "Function Analysis" [level=3] [ref=e72]
+            - paragraph [ref=e73]: Switch between derivative, integral, root-solver, and plotting tools without scrolling through unrelated controls.
+            - link "Open analysis" [ref=e74] [cursor=pointer]:
+              - /url: "#function-analysis"
+          - article [ref=e75]:
+            - generic [ref=e76]: "04"
+            - heading "Constants Library" [level=3] [ref=e77]
+            - paragraph [ref=e78]: Search mathematical, physical, and thermodynamic constants with copy and calculator insertion actions.
+            - link "Browse constants" [ref=e79] [cursor=pointer]:
+              - /url: "#constants"
+          - article [ref=e80]:
+            - generic [ref=e81]: "05"
+            - heading "Elements Library" [level=3] [ref=e82]
+            - paragraph [ref=e83]: Inspect a curated materials-focused elemental database and compare two elements side by side.
+            - link "Explore elements" [ref=e84] [cursor=pointer]:
+              - /url: "#elements"
+          - article [ref=e85]:
+            - generic [ref=e86]: "06"
+            - heading "Materials Strengthening" [level=3] [ref=e87]
+            - paragraph [ref=e88]: Estimate Hall-Petch, dislocation, cutting, and Orowan contributions with formulas and comparison charts.
+            - link "Study strengthening" [ref=e89] [cursor=pointer]:
+              - /url: "#strengthening"
+          - article [ref=e90]:
+            - generic [ref=e91]: "07"
+            - heading "Visual Lab" [level=3] [ref=e92]
+            - paragraph [ref=e93]: Run parameter sweeps and live comparison plots to see how key strengthening variables reshape trends.
+            - link "Open visual lab" [ref=e94] [cursor=pointer]:
+              - /url: "#visual-lab"
+      - generic [ref=e95]: Prototype for scientific exploration and educational calculation. Engineering decisions should still be validated against literature, calibrated models, and experimentally grounded inputs.
+  - status
+  - generic [ref=e98]:
+    - generic [ref=e99]: "[plugin:vite:import-analysis] Failed to parse source for import analysis because the content contains invalid JS syntax. If you are using JSX, make sure to name the file with the .jsx or .tsx extension."
+    - generic [ref=e100]: D:/MatSci Calculator Lab/app.js:1:1
+    - generic [ref=e101]: 1 | // app.js — 主应用逻辑 | ^ 2 | "use strict"; 3 |
+    - generic [ref=e102]: at TransformPluginContext._formatLog (file:///D:/MatSci%20Calculator%20Lab/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:42553:41) at TransformPluginContext.error (file:///D:/MatSci%20Calculator%20Lab/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:42550:16) at TransformPluginContext.transform (file:///D:/MatSci%20Calculator%20Lab/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:40480:14) at async EnvironmentPluginContainer.transform (file:///D:/MatSci%20Calculator%20Lab/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:42348:18) at async loadAndTransform (file:///D:/MatSci%20Calculator%20Lab/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:35740:27) at async viteTransformMiddleware (file:///D:/MatSci%20Calculator%20Lab/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:37264:24
+    - generic [ref=e103]:
+      - text: Click outside, press Esc key, or fix the code to dismiss.
+      - text: You can also disable this overlay by setting
+      - code [ref=e104]: server.hmr.overlay
+      - text: to
+      - code [ref=e105]: "false"
+      - text: in
+      - code [ref=e106]: vite.config.js
+      - text: .

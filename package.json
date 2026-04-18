@@ -1,0 +1,39 @@
+{
+  "name": "matsci-calculator-lab",
+  "version": "1.0.0",
+  "description": "一款面向材料科学领域的科学计算器，集成公式编辑、函数分析、常数/元素数据库、材料强化模型计算与可视化。",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "cap:init": "cap init \"MatSci Calculator\" com.matsci.calculator --web-dir dist",
+    "cap:add:android": "cap add android",
+    "cap:add:ios": "cap add ios",
+    "cap:sync": "cap sync",
+    "cap:open:android": "cap open android",
+    "cap:open:ios": "cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/cli": "^7.6.2",
+    "@capacitor/core": "^8.3.1",
+    "@fontsource/ibm-plex-mono": "^5.2.7",
+    "@fontsource/ibm-plex-sans": "^5.2.8",
+    "@fontsource/stix-two-math": "^4.5.2",
+    "@fontsource/stix-two-text": "^5.2.8",
+    "mathjax": "^3.2.2",
+    "mathjs": "^15.2.0",
+    "mathlive": "^0.109.1",
+    "nerdamer": "^1.1.13",
+    "plotly.js": "^3.5.0",
+    "plotly.js-dist-min": "^3.5.0",
+    "vite": "^6.4.2"
+  },
+  "keywords": [
+    "calculator",
+    "materials-science",
+    "scientific"
+  ],
+  "author": "",
+  "license": "ISC"
+}

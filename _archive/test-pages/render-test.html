@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>渲染测试</title>
+  <style>
+    /* 测试1: 最简单的布局 */
+    .test-1 {
+      background: #ff0000;
+      color: white;
+      padding: 20px;
+      margin: 20px;
+    }
+    
+    /* 测试2: 模拟项目布局 */
+    .app-shell {
+      display: flex;
+      height: 100vh;
+    }
+    
+    .sidebar {
+      width: 300px;
+      background: #f0f0f0;
+      padding: 20px;
+    }
+    
+    .main-content {
+      flex: 1;
+      overflow: auto;
+      padding: 20px;
+      background: #ffffff;
+    }
+    
+    .page-section {
+      display: none;
+      background: #e0f7fa;
+      padding: 20px;
+      margin-bottom: 20px;
+      min-height: 500px;
+    }
+    
+    .page-section.active {
+      display: block;
+    }
+    
+    /* 测试3: 强制显示 */
+    .force-show {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      position: relative !important;
+      top: 0 !important;
+      left: 0 !important;
+      height: auto !important;
+      min-height: 100px !important;
+    }
+  </style>
+</head>
+<body>
+  <h1>渲染测试页面</h1>
+  
+  <!-- 测试1: 基础渲染 -->
+  <h2>测试1: 基础渲染</h2>
+  <div class="test-1">
+    <strong>如果您能看到这个红色背景的文字</strong><br>
+    说明浏览器基本渲染功能正常
+  </div>
+  
+  <!-- 测试2: 模拟项目布局 -->
+  <h2>测试2: 模拟项目布局</h2>
+  <div class="app-shell">
+    <div class="sidebar">
+      <h3>侧边栏</h3>
+      <button onclick="showPage('page1')">显示页面1</button>
+      <button onclick="showPage('page2')">显示页面2</button>
+    </div>
+    <div class="main-content">
+      <div id="page1" class="page-section active">
+        <h3>页面1</h3>
+        <p>这是页面1的内容</p>
+        <p>如果能看到这个，说明布局正常</p>
+      </div>
+      <div id="page2" class="page-section">
+        <h3>页面2</h3>
+        <p>这是页面2的内容</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 测试3: 强制显示测试 -->
+  <h2>测试3: 强制显示</h2>
+  <button onclick="forceShow()">强制显示页面2</button>
+  <div id="page3" class="page-section">
+    <h3>页面3 (将被强制显示)</h3>
+    <p>这个页面初始是隐藏的</p>
+    <p>点击上面的按钮会强制显示它</p>
+  </div>
+  
+  <script>
+    function showPage(pageId) {
+      document.querySelectorAll('.page-section').forEach(p => {
+        p.classList.remove('active');
+      });
+      document.getElementById(pageId).classList.add('active');
+      console.log('切换到:', pageId);
+    }
+    
+    function forceShow() {
+      const page3 = document.getElementById('page3');
+      page3.classList.add('force-show');
+      console.log('强制显示页面3');
+      console.log('computed display:', getComputedStyle(page3).display);
+    }
+  </script>
+</body>
+</html>

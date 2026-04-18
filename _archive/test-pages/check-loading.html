@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>加载状态检查</title>
+</head>
+<body>
+  <h1>检查脚本加载状态</h1>
+  <pre id="output"></pre>
+  
+  <script>
+    const output = document.getElementById('output');
+    let log = '';
+    
+    function addLog(msg) {
+      log += msg + '\n';
+      output.textContent = log;
+      console.log(msg);
+    }
+    
+    addLog('=== 脚本加载检查 ===\n');
+    
+    // 检查1: MSCLab 对象
+    addLog('1. 检查 window.MSCLab:');
+    addLog('   window.MSCLab = ' + (window.MSCLab ? '✅ 存在' : '❌ 不存在'));
+    
+    if (window.MSCLab) {
+      addLog('\n2. 检查 MSCLab 的子模块:');
+      addLog('   MSCLab.Utils = ' + (window.MSCLab.Utils ? '✅' : '❌'));
+      addLog('   MSCLab.Models = ' + (window.MSCLab.Models ? '✅' : '❌'));
+      addLog('   MSCLab.constantsData = ' + (window.MSCLab.constantsData ? '✅ (' + window.MSCLab.constantsData.length + '个)' : '❌'));
+      addLog('   MSCLab.elementsData = ' + (window.MSCLab.elementsData ? '✅ (' + window.MSCLab.elementsData.length + '个)' : '❌'));
+    }
+    
+    // 检查2: 全局变量
+    addLog('\n3. 检查全局函数:');
+    addLog('   Utils = ' + (typeof Utils));
+    addLog('   Models = ' + (typeof Models));
+    addLog('   getById = ' + (typeof getById));
+    addLog('   init = ' + (typeof init));
+    
+    // 检查3: 页面元素
+    addLog('\n4. 检查页面元素:');
+    const pages = ['home', 'classic-calculator', 'scientific-calculator', 
+                   'function-analysis', 'constants', 'elements', 
+                   'strengthening', 'visual-lab'];
+    
+    pages.forEach(id => {
+      const el = document.getElementById(id);
+      const hasClass = el && el.classList.contains('active');
+      addLog('   ' + id + ': ' + (el ? '✅' : '❌') + (hasClass ? ' (active)' : ''));
+    });
+    
+    // 检查4: 尝试查找 app.js 中的错误
+    addLog('\n5. 检查 JavaScript 错误:');
+    addLog('   请查看浏览器 Console 中的红色错误信息');
+    
+    addLog('\n=== 诊断完成 ===');
+    addLog('\n如果 MSCLab 显示 ❌，说明依赖文件没有加载成功');
+    addLog('如果 init 显示 undefined，说明 app.js 执行失败');
+  </script>
+  
+  <!-- 重新加载所有脚本 -->
+  <script src="data/constants.js"></script>
+  <script src="data/elements.js"></script>
+  <script src="modules/utils.js"></script>
+  <script src="modules/models.js"></script>
+  
+  <script>
+    // 再次检查
+    setTimeout(() => {
+      addLog('\n\n=== 加载后再次检查 ===\n');
+      addLog('window.MSCLab = ' + (window.MSCLab ? '✅' : '❌'));
+      
+      if (window.MSCLab) {
+        addLog('MSCLab.Utils = ' + (window.MSCLab.Utils ? '✅' : '❌'));
+        addLog('MSCLab.Models = ' + (window.MSCLab.Models ? '✅' : '❌'));
+        
+        addLog('\n✅ 依赖加载成功！现在可以加载 app.js');
+        
+        // 动态加载 app.js
+        const appScript = document.createElement('script');
+        appScript.src = 'app.js';
+        appScript.onload = () => {
+          addLog('✅ app.js 加载成功');
+          addLog('\n请刷新此页面，然后检查主应用 index.html');
+        };
+        appScript.onerror = () => {
+          addLog('❌ app.js 加载失败');
+        };
+        document.head.appendChild(appScript);
+      } else {
+        addLog('❌ 依赖加载失败，请检查:');
+        addLog('   - 文件路径是否正确');
+        addLog('   - 服务器是否正常工作');
+        addLog('   - Network 标签中是否有404错误');
+      }
+    }, 500);
+  </script>
+</body>
+</html>

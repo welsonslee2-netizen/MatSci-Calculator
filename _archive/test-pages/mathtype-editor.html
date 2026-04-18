@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MathType 公式编辑器</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/mathlive@0.98.5/dist/mathlive.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: #f5f7fa;
+      padding: 20px;
+    }
+
+    .editor-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    /* 标题栏 */
+    .title-bar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .title-bar h1 {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .title-bar .subtitle {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .toolbar-actions button {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    .toolbar-actions button:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    /* 分类标签页 */
+    .category-tabs {
+      display: flex;
+      background: #f8f9fa;
+      border-bottom: 2px solid #e9ecef;
+      overflow-x: auto;
+    }
+
+    .category-tab {
+      padding: 12px 20px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      font-size: 14px;
+      font-weight: 500;
+      color: #495057;
+      transition: all 0.3s;
+      white-space: nowrap;
+      position: relative;
+    }
+
+    .category-tab:hover {
+      background: #e9ecef;
+      color: #667eea;
+    }
+
+    .category-tab.active {
+      color: #667eea;
+      background: white;
+    }
+
+    .category-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #667eea;
+    }
+
+    /* 模板面板 */
+    .template-panel {
+      padding: 20px;
+      background: white;
+      border-bottom: 1px solid #e9ecef;
+      min-height: 200px;
+    }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 12px;
+    }
+
+    .template-item {
+      padding: 15px 10px;
+      background: #f8f9fa;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s;
+      user-select: none;
+    }
+
+    .template-item:hover {
+      background: #e9ecef;
+      border-color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+
+    .template-item .latex-code {
+      font-size: 11px;
+      color: #6c757d;
+      margin-top: 5px;
+      font-family: monospace;
+    }
+
+    /* 编辑区域 */
+    .editor-area {
+      padding: 30px;
+      background: #fafbfc;
+    }
+
+    .editor-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    #formula-editor {
+      width: 100%;
+      min-height: 200px;
+      padding: 20px;
+      font-size: 24px;
+      border: 2px solid #dee2e6;
+      border-radius: 8px;
+      background: white;
+      transition: border-color 0.3s;
+    }
+
+    #formula-editor:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    /* 输出面板 */
+    .output-panel {
+      padding: 30px;
+      background: white;
+      border-top: 1px solid #e9ecef;
+    }
+
+    .output-section {
+      margin-bottom: 20px;
+    }
+
+    .output-section h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .output-box {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 15px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #495057;
+      word-break: break-all;
+      position: relative;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.3s;
+    }
+
+    .copy-btn:hover {
+      background: #5568d3;
+    }
+
+    .copy-btn.copied {
+      background: #28a745;
+    }
+
+    /* 图片识别区域 */
+    .ocr-section {
+      padding: 30px;
+      background: #f8f9fa;
+      border-top: 1px solid #e9ecef;
+    }
+
+    .upload-area {
+      border: 3px dashed #dee2e6;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: white;
+    }
+
+    .upload-area:hover {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+
+    .upload-area .icon {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    .upload-area .text {
+      font-size: 16px;
+      color: #495057;
+      margin-bottom: 5px;
+    }
+
+    .upload-area .hint {
+      font-size: 12px;
+      color: #6c757d;
+    }
+
+    #ocr-preview {
+      max-width: 100%;
+      max-height: 300px;
+      margin-top: 20px;
+      border-radius: 8px;
+      display: none;
+    }
+
+    #ocr-result {
+      margin-top: 20px;
+      padding: 20px;
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      display: none;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .title-bar {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .template-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      }
+
+      #formula-editor {
+        font-size: 18px;
+        min-height: 150px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="editor-container">
+    <!-- 标题栏 -->
+    <div class="title-bar">
+      <div>
+        <h1>📐 MathType 公式编辑器</h1>
+        <div class="subtitle">专业的数学公式编辑工具，支持 LaTeX、MathML 等多种格式</div>
+      </div>
+      <div class="toolbar-actions">
+        <button onclick="clearEditor()">🗑️ 清空</button>
+        <button onclick="undoEdit()">↩️ 撤销</button>
+        <button onclick="redoEdit()">↪️ 重做</button>
+      </div>
+    </div>
+
+    <!-- 分类标签页 -->
+    <div class="category-tabs" id="category-tabs">
+      <button class="category-tab active" data-category="algebra">🔢 代数</button>
+      <button class="category-tab" data-category="calculus">∫ 微积分</button>
+      <button class="category-tab" data-category="trig">📐 三角函数</button>
+      <button class="category-tab" data-category="greek">αβ 希腊字母</button>
+      <button class="category-tab" data-category="symbols">± 符号</button>
+      <button class="category-tab" data-category="arrows">→ 箭头</button>
+      <button class="category-tab" data-category="matrices">▦ 矩阵</button>
+      <button class="category-tab" data-category="sets">∈ 集合</button>
+      <button class="category-tab" data-category="logic">∧ 逻辑</button>
+      <button class="category-tab" data-category="physics">⚛ 物理</button>
+    </div>
+
+    <!-- 模板面板 -->
+    <div class="template-panel">
+      <div id="template-container" class="template-grid"></div>
+    </div>
+
+    <!-- 编辑区域 -->
+    <div class="editor-area">
+      <label class="editor-label">📝 公式编辑区（点击模板或键盘输入）</label>
+      <math-field
+        id="formula-editor"
+        virtual-keyboard-mode="manual"
+        spellcheck="false"
+        placeholder="在此输入或选择上方模板..."
+      ></math-field>
+    </div>
+
+    <!-- 输出面板 -->
+    <div class="output-panel">
+      <div class="output-section">
+        <h3>📋 LaTeX 代码</h3>
+        <div class="output-box">
+          <button class="copy-btn" onclick="copyToClipboard('latex-output')">复制</button>
+          <pre id="latex-output"></pre>
+        </div>
+      </div>
+
+      <div class="output-section">
+        <h3>🔧 MathML 代码</h3>
+        <div class="output-box">
+          <button class="copy-btn" onclick="copyToClipboard('mathml-output')">复制</button>
+          <pre id="mathml-output"></pre>
+        </div>
+      </div>
+
+      <div class="output-section">
+        <h3>📊 ASCII Math</h3>
+        <div class="output-box">
+          <button class="copy-btn" onclick="copyToClipboard('ascii-output')">复制</button>
+          <pre id="ascii-output"></pre>
+        </div>
+      </div>
+
+      <div class="output-section">
+        <h3>🖼️ 公式图片（右键保存）</h3>
+        <div id="formula-image-container" style="background: white; padding: 20px; border: 1px solid #dee2e6; border-radius: 8px; text-align: center;">
+          <canvas id="formula-canvas" style="display: none;"></canvas>
+          <img id="formula-image" style="max-width: 100%;" />
+        </div>
+      </div>
+    </div>
+
+    <!-- 图片识别区域 -->
+    <div class="ocr-section">
+      <h3 style="margin-bottom: 20px; color: #495057;">📷 图片公式识别（OCR）</h3>
+      <div class="upload-area" id="upload-area">
+        <div class="icon">📤</div>
+        <div class="text">点击或拖拽图片到此处</div>
+        <div class="hint">支持 PNG、JPG、GIF 格式</div>
+        <input type="file" id="image-input" accept="image/*" style="display: none;">
+      </div>
+      <img id="ocr-preview" />
+      <div id="ocr-result">
+        <h4 style="margin-bottom: 10px;">识别结果：</h4>
+        <div class="output-box">
+          <button class="copy-btn" onclick="copyToClipboard('ocr-latex')">复制</button>
+          <pre id="ocr-latex"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 模板数据库
+    const templates = {
+      algebra: [
+        { latex: '\\frac{#?}{#?}', display: 'a/b', label: '分数' },
+        { latex: '\\sqrt{#?}', display: '√x', label: '平方根' },
+        { latex: '\\sqrt[#?]{#?}', display: 'ⁿ√x', label: 'n次根' },
+        { latex: '^2', display: 'x²', label: '平方' },
+        { latex: '^3', display: 'x³', label: '立方' },
+        { latex: '^n', display: 'xⁿ', label: 'n次幂' },
+        { latex: '_n', display: 'xₙ', label: '下标' },
+        { latex: '^{#?}_{#?}', display: 'xⁿ', label: '上下标' },
+        { latex: '\\binom{n}{k}', display: 'C(n,k)', label: '组合数' },
+        { latex: 'n!', display: 'n!', label: '阶乘' },
+        { latex: '|#?|', display: '|x|', label: '绝对值' },
+        { latex: '\\lfloor #? \\rfloor', display: '⌊x⌋', label: '向下取整' },
+        { latex: '\\lceil #? \\rceil', display: '⌈x', label: '向上取整' },
+        { latex: '\\overline{#?}', display: 'x̄', label: '平均值' },
+        { latex: '\\hat{#?}', display: 'x̂', label: '帽子符号' },
+        { latex: '\\tilde{#?}', display: 'x̃', label: '波浪符号' },
+      ],
+      calculus: [
+        { latex: '\\int_{#?}^{#?}', display: '∫', label: '定积分' },
+        { latex: '\\iint_{#?}^{#?}', display: '∬', label: '二重积分' },
+        { latex: '\\iiint_{#?}^{#?}', display: '∭', label: '三重积分' },
+        { latex: '\\oint_{#?}', display: '∮', label: '环路积分' },
+        { latex: '\\sum_{#?}^{#?}', display: 'Σ', label: '求和' },
+        { latex: '\\prod_{#?}^{#?}', display: 'Π', label: '求积' },
+        { latex: '\\lim_{x \\to #?}', display: 'lim', label: '极限' },
+        { latex: '\\frac{d}{dx}', display: 'd/dx', label: '导数' },
+        { latex: '\\frac{\\partial}{\\partial x}', display: '∂/∂x', label: '偏导数' },
+        { latex: '\\nabla', display: '∇', label: '梯度' },
+        { latex: '\\infty', display: '∞', label: '无穷大' },
+        { latex: '\\partial', display: '∂', label: '偏微分' },
+      ],
+      trig: [
+        { latex: '\\sin(#?)', display: 'sin', label: '正弦' },
+        { latex: '\\cos(#?)', display: 'cos', label: '余弦' },
+        { latex: '\\tan(#?)', display: 'tan', label: '正切' },
+        { latex: '\\cot(#?)', display: 'cot', label: '余切' },
+        { latex: '\\sec(#?)', display: 'sec', label: '正割' },
+        { latex: '\\csc(#?)', display: 'csc', label: '余割' },
+        { latex: '\\arcsin(#?)', display: 'asin', label: '反正弦' },
+        { latex: '\\arccos(#?)', display: 'acos', label: '反余弦' },
+        { latex: '\\arctan(#?)', display: 'atan', label: '反正切' },
+        { latex: '\\sinh(#?)', display: 'sinh', label: '双曲正弦' },
+        { latex: '\\cosh(#?)', display: 'cosh', label: '双曲余弦' },
+        { latex: '\\tanh(#?)', display: 'tanh', label: '双曲正切' },
+      ],
+      greek: [
+        { latex: '\\alpha', display: 'α', label: 'alpha' },
+        { latex: '\\beta', display: 'β', label: 'beta' },
+        { latex: '\\gamma', display: 'γ', label: 'gamma' },
+        { latex: '\\delta', display: 'δ', label: 'delta' },
+        { latex: '\\epsilon', display: 'ε', label: 'epsilon' },
+        { latex: '\\zeta', display: 'ζ', label: 'zeta' },
+        { latex: '\\eta', display: 'η', label: 'eta' },
+        { latex: '\\theta', display: 'θ', label: 'theta' },
+        { latex: '\\iota', display: 'ι', label: 'iota' },
+        { latex: '\\kappa', display: 'κ', label: 'kappa' },
+        { latex: '\\lambda', display: 'λ', label: 'lambda' },
+        { latex: '\\mu', display: 'μ', label: 'mu' },
+        { latex: '\\nu', display: 'ν', label: 'nu' },
+        { latex: '\\xi', display: 'ξ', label: 'xi' },
+        { latex: '\\pi', display: 'π', label: 'pi' },
+        { latex: '\\rho', display: 'ρ', label: 'rho' },
+        { latex: '\\sigma', display: 'σ', label: 'sigma' },
+        { latex: '\\tau', display: 'τ', label: 'tau' },
+        { latex: '\\upsilon', display: 'υ', label: 'upsilon' },
+        { latex: '\\phi', display: 'φ', label: 'phi' },
+        { latex: '\\chi', display: 'χ', label: 'chi' },
+        { latex: '\\psi', display: 'ψ', label: 'psi' },
+        { latex: '\\omega', display: 'ω', label: 'omega' },
+        { latex: '\\Gamma', display: 'Γ', label: 'Gamma' },
+        { latex: '\\Delta', display: 'Δ', label: 'Delta' },
+        { latex: '\\Theta', display: 'Θ', label: 'Theta' },
+        { latex: '\\Lambda', display: 'Λ', label: 'Lambda' },
+        { latex: '\\Sigma', display: 'Σ', label: 'Sigma' },
+        { latex: '\\Phi', display: 'Φ', label: 'Phi' },
+        { latex: '\\Psi', display: 'Ψ', label: 'Psi' },
+        { latex: '\\Omega', display: 'Ω', label: 'Omega' },
+      ],
+      symbols: [
+        { latex: '\\pm', display: '±', label: '正负' },
+        { latex: '\\mp', display: '∓', label: '负正' },
+        { latex: '\\times', display: '×', label: '乘号' },
+        { latex: '\\div', display: '÷', label: '除号' },
+        { latex: '\\cdot', display: '·', label: '点乘' },
+        { latex: '\\leq', display: '≤', label: '小于等于' },
+        { latex: '\\geq', display: '≥', label: '大于等于' },
+        { latex: '\\neq', display: '≠', label: '不等于' },
+        { latex: '\\approx', display: '≈', label: '约等于' },
+        { latex: '\\equiv', display: '≡', label: '恒等于' },
+        { latex: '\\sim', display: '∼', label: '相似' },
+        { latex: '\\propto', display: '∝', label: '正比于' },
+        { latex: '\\in', display: '∈', label: '属于' },
+        { latex: '\\notin', display: '∉', label: '不属于' },
+        { latex: '\\subset', display: '⊂', label: '真子集' },
+        { latex: '\\supset', display: '⊃', label: '真超集' },
+        { latex: '\\cup', display: '∪', label: '并集' },
+        { latex: '\\cap', display: '∩', label: '交集' },
+        { latex: '\\emptyset', display: '∅', label: '空集' },
+        { latex: '\\forall', display: '∀', label: '任意' },
+        { latex: '\\exists', display: '∃', label: '存在' },
+        { latex: '\\nexists', display: '∄', label: '不存在' },
+      ],
+      arrows: [
+        { latex: '\\rightarrow', display: '→', label: '右箭头' },
+        { latex: '\\leftarrow', display: '←', label: '左箭头' },
+        { latex: '\\leftrightarrow', display: '↔', label: '左右箭头' },
+        { latex: '\\Rightarrow', display: '⇒', label: '右双线箭头' },
+        { latex: '\\Leftarrow', display: '⇐', label: '左双线箭头' },
+        { latex: '\\Leftrightarrow', display: '⇔', label: '双向箭头' },
+        { latex: '\\uparrow', display: '↑', label: '上箭头' },
+        { latex: '\\downarrow', display: '↓', label: '下箭头' },
+        { latex: '\\nearrow', display: '↗', label: '右上箭头' },
+        { latex: '\\searrow', display: '↘', label: '右下箭头' },
+        { latex: '\\mapsto', display: '↦', label: '映射' },
+        { latex: '\\to', display: '→', label: '趋向' },
+      ],
+      matrices: [
+        { latex: '\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}', display: '( )', label: '圆括号矩阵' },
+        { latex: '\\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix}', display: '[ ]', label: '方括号矩阵' },
+        { latex: '\\begin{vmatrix} a & b \\\\ c & d \\end{vmatrix}', display: '| |', label: '行列式' },
+        { latex: '\\begin{Bmatrix} a & b \\\\ c & d \\end{Bmatrix}', display: '{ }', label: '花括号矩阵' },
+        { latex: '\\begin{matrix} a & b \\\\ c & d \\end{matrix}', display: '矩阵', label: '无括号矩阵' },
+        { latex: '\\begin{cases} #? \\\\ #? \\end{cases}', display: 'cases', label: '分段函数' },
+      ],
+      sets: [
+        { latex: '\\mathbb{N}', display: 'ℕ', label: '自然数' },
+        { latex: '\\mathbb{Z}', display: 'ℤ', label: '整数' },
+        { latex: '\\mathbb{Q}', display: 'ℚ', label: '有理数' },
+        { latex: '\\mathbb{R}', display: 'ℝ', label: '实数' },
+        { latex: '\\mathbb{C}', display: 'ℂ', label: '复数' },
+        { latex: '\\mathbb{P}', display: 'ℙ', label: '素数' },
+        { latex: '\\varnothing', display: '∅', label: '空集' },
+        { latex: '\\in', display: '∈', label: '属于' },
+        { latex: '\\notin', display: '∉', label: '不属于' },
+        { latex: '\\subset', display: '⊂', label: '子集' },
+        { latex: '\\supset', display: '⊃', label: '超集' },
+        { latex: '\\cup', display: '∪', label: '并集' },
+        { latex: '\\cap', display: '∩', label: '交集' },
+        { latex: '\\setminus', display: '\\', label: '差集' },
+      ],
+      logic: [
+        { latex: '\\land', display: '∧', label: '逻辑与' },
+        { latex: '\\lor', display: '∨', label: '逻辑或' },
+        { latex: '\\neg', display: '¬', label: '逻辑非' },
+        { latex: '\\implies', display: '⇒', label: '蕴含' },
+        { latex: '\\iff', display: '⇔', label: '当且仅当' },
+        { latex: '\\forall', display: '∀', label: '全称量词' },
+        { latex: '\\exists', display: '∃', label: '存在量词' },
+        { latex: '\\therefore', display: '∴', label: '所以' },
+        { latex: '\\because', display: '∵', label: '因为' },
+        { latex: '\\vdash', display: '⊢', label: '推出' },
+      ],
+      physics: [
+        { latex: '\\hbar', display: 'ℏ', label: '约化普朗克常数' },
+        { latex: '\\ell', display: 'ℓ', label: '长度' },
+        { latex: '\\degree', display: '°', label: '度' },
+        { latex: '\\mathrm{e}', display: 'e', label: '自然常数' },
+        { latex: '\\mathrm{i}', display: 'i', label: '虚数单位' },
+        { latex: '\\vec{#?}', display: 'x⃗', label: '向量' },
+        { latex: '\\mathbf{#?}', display: 'x', label: '粗体向量' },
+        { latex: '\\dot{#?}', display: 'ẋ', label: '时间导数' },
+        { latex: '\\ddot{#?}', display: 'ẍ', label: '二阶时间导数' },
+        { latex: '\\breve{#?}', display: 'x̆', label: 'breve符号' },
+      ]
+    };
+
+    // 当前分类
+    let currentCategory = 'algebra';
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', function() {
+      // 加载初始模板
+      loadTemplates(currentCategory);
+
+      // 标签页切换
+      document.querySelectorAll('.category-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+          document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          currentCategory = this.dataset.category;
+          loadTemplates(currentCategory);
+        });
+      });
+
+      // 监听编辑器变化
+      const editor = document.getElementById('formula-editor');
+      editor.addEventListener('input', updateOutputs);
+      
+      // 初始更新输出
+      updateOutputs();
+    });
+
+    // 加载模板
+    function loadTemplates(category) {
+      const container = document.getElementById('template-container');
+      container.innerHTML = '';
+
+      const items = templates[category] || [];
+      items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'template-item';
+        div.innerHTML = `
+          <div style="font-size: 24px; margin-bottom: 5px;">${item.display}</div>
+          <div class="latex-code">${item.label}</div>
+        `;
+        div.addEventListener('click', () => insertTemplate(item.latex));
+        container.appendChild(div);
+      });
+    }
+
+    // 插入模板
+    function insertTemplate(latex) {
+      const editor = document.getElementById('formula-editor');
+      editor.focus();
+      editor.executeCommand('insert', latex);
+      updateOutputs();
+    }
+
+    // 更新输出
+    function updateOutputs() {
+      const editor = document.getElementById('formula-editor');
+      const latex = editor.value || '';
+      
+      // LaTeX
+      document.getElementById('latex-output').textContent = latex;
+      
+      // MathML
+      try {
+        const mathml = editor.getValue('math-ml');
+        document.getElementById('mathml-output').textContent = mathml;
+      } catch(e) {
+        document.getElementById('mathml-output').textContent = '（需要 MathLive 支持）';
+      }
+      
+      // ASCII Math
+      const ascii = latexToAscii(latex);
+      document.getElementById('ascii-output').textContent = ascii;
+      
+      // 生成公式图片
+      generateFormulaImage(latex);
+    }
+
+    // LaTeX 转 ASCII Math
+    function latexToAscii(latex) {
+      let ascii = latex;
+      ascii = ascii.replace(/\\\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)');
+      ascii = ascii.replace(/\\\\sqrt\{([^}]+)\}/g, 'sqrt($1)');
+      ascii = ascii.replace(/\\\\sin/g, 'sin');
+      ascii = ascii.replace(/\\\\cos/g, 'cos');
+      ascii = ascii.replace(/\\\\tan/g, 'tan');
+      ascii = ascii.replace(/\\\\ln/g, 'ln');
+      ascii = ascii.replace(/\\\\log/g, 'log');
+      ascii = ascii.replace(/\\\\exp/g, 'exp');
+      ascii = ascii.replace(/\\\\pi/g, 'pi');
+      ascii = ascii.replace(/\\\\infty/g, 'infinity');
+      ascii = ascii.replace(/\\\\cdot/g, '*');
+      ascii = ascii.replace(/\\\\times/g, '*');
+      ascii = ascii.replace(/\\\\div/g, '/');
+      return ascii;
+    }
+
+    // 生成公式图片
+    function generateFormulaImage(latex) {
+      if (!latex) {
+        document.getElementById('formula-image').style.display = 'none';
+        return;
+      }
+
+      // 使用 MathJax 生成 SVG，然后转为图片
+      const canvas = document.getElementById('formula-canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // 简单实现：显示 LaTeX 文本
+      const img = document.getElementById('formula-image');
+      img.style.display = 'block';
+      img.alt = latex;
+      img.title = '右键保存此公式图片';
+      
+      // 使用 MathLive 的渲染
+      try {
+        const mathField = document.getElementById('formula-editor');
+        const svgContent = mathField.getValue('svg-content');
+        if (svgContent) {
+          // 创建 Blob 并转换为图片 URL
+          const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+          const url = URL.createObjectURL(blob);
+          img.src = url;
+        }
+      } catch(e) {
+        console.log('图片生成需要 MathLive 完整支持');
+      }
+    }
+
+    // 复制到剪贴板
+    function copyToClipboard(elementId) {
+      const element = document.getElementById(elementId);
+      const text = element.textContent;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = element.previousElementSibling;
+        btn.textContent = '✓ 已复制';
+        btn.classList.add('copied');
+        
+        setTimeout(() => {
+          btn.textContent = '复制';
+          btn.classList.remove('copied');
+        }, 2000);
+      }).catch(err => {
+        console.error('复制失败:', err);
+        alert('复制失败，请手动选择文本复制');
+      });
+    }
+
+    // 清空编辑器
+    function clearEditor() {
+      const editor = document.getElementById('formula-editor');
+      editor.executeCommand('deleteAll');
+      updateOutputs();
+    }
+
+    // 撤销
+    function undoEdit() {
+      const editor = document.getElementById('formula-editor');
+      editor.executeCommand('undo');
+      updateOutputs();
+    }
+
+    // 重做
+    function redoEdit() {
+      const editor = document.getElementById('formula-editor');
+      editor.executeCommand('redo');
+      updateOutputs();
+    }
+
+    // 图片上传和 OCR
+    const uploadArea = document.getElementById('upload-area');
+    const imageInput = document.getElementById('image-input');
+    const ocrPreview = document.getElementById('ocr-preview');
+    const ocrResult = document.getElementById('ocr-result');
+
+    uploadArea.addEventListener('click', () => {
+      imageInput.click();
+    });
+
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = '#667eea';
+      uploadArea.style.background = '#f0f4ff';
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.style.borderColor = '#dee2e6';
+      uploadArea.style.background = 'white';
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = '#dee2e6';
+      uploadArea.style.background = 'white';
+      
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        handleImageFile(file);
+      }
+    });
+
+    imageInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        handleImageFile(file);
+      }
+    });
+
+    function handleImageFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        ocrPreview.src = e.target.result;
+        ocrPreview.style.display = 'block';
+        
+        // TODO: 这里需要集成 OCR API
+        // 示例：使用 InftyReader、Mathpix 或其他 OCR 服务
+        ocrResult.style.display = 'block';
+        document.getElementById('ocr-latex').textContent = 
+          '（需要集成 OCR API，如 Mathpix、InftyReader 等）\\n\\n' +
+          '建议的 OCR 服务：\\n' +
+          '1. Mathpix API - https://mathpix.com/\\n' +
+          '2. InftyReader - 专门的数学公式 OCR\\n' +
+          '3. SimpleTex - 国内可用的公式识别服务';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // 键盘快捷键
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'z') {
+        e.preventDefault();
+        undoEdit();
+      } else if (e.ctrlKey && e.key === 'y') {
+        e.preventDefault();
+        redoEdit();
+      }
+    });
+  </script>
+</body>
+</html>

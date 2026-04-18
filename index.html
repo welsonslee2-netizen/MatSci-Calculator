@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MatSci Calculator Lab</title>
+  <meta
+    name="description"
+    content="A lightweight materials-science calculator and visualization prototype for students, researchers, and engineers."
+  >
+  <!-- 字体已通过 main.js 的 npm 包本地加载（@fontsource/ibm-plex-sans, @fontsource/ibm-plex-mono, @fontsource/stix-two-math, @fontsource/stix-two-text） -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- Vite 入口：统一管理所有依赖（mathjs/Plotly/MathLive/MathJax）和业务模块 -->
+  <script type="module" src="./main.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-block">
+        <div class="brand-mark">MS</div>
+        <div>
+          <p class="eyebrow" data-i18n="sidebarEyebrow">Scientific Prototype</p>
+          <h1>MatSci Calculator Lab</h1>
+          <p class="brand-copy" data-i18n="sidebarCopy">Materials computation, reference data, and strengthening analysis in one local dashboard.</p>
+        </div>
+      </div>
+
+      <div class="language-switcher">
+        <span class="field-label" data-i18n="languageLabel">Language</span>
+        <div id="language-switcher" class="segmented-control" role="group" aria-label="Language" data-i18n-aria-label="languageLabel">
+          <button class="lang-button active" type="button" data-language="en">EN</button>
+          <button class="lang-button" type="button" data-language="zh">&#20013;&#25991;</button>
+        </div>
+      </div>
+
+      <div class="sidebar-nav-block">
+        <p class="eyebrow" data-i18n="panelNavEyebrow">Workspaces</p>
+        <nav class="sidebar-nav" aria-label="Primary navigation" data-i18n-aria-label="navPrimaryAria">
+          <button class="nav-link active" type="button" data-page="home" data-i18n="navHome">Home</button>
+          <button class="nav-link" type="button" data-page="classic-calculator" data-i18n="navClassic">Classic Calculator</button>
+          <button class="nav-link" type="button" data-page="scientific-calculator" data-i18n="navScientific">Scientific Calculator</button>
+          <button class="nav-link" type="button" data-page="function-analysis" data-i18n="navAnalysis">Function Analysis</button>
+          <button class="nav-link" type="button" data-page="constants" data-i18n="navConstants">Constants Library</button>
+          <button class="nav-link" type="button" data-page="elements" data-i18n="navElements">Elements Library</button>
+          <button class="nav-link" type="button" data-page="strengthening" data-i18n="navStrengthening">Materials Strengthening</button>
+          <button class="nav-link" type="button" data-page="visual-lab" data-i18n="navVisual">Visual Lab</button>
+        </nav>
+      </div>
+
+      <div class="sidebar-card">
+        <span class="status-pill" data-i18n="prototypeVersion">Prototype v1</span>
+        <p data-i18n="sidebarCardCopy">Built with plain HTML, CSS, and JavaScript for lightweight local use with no backend.</p>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <section id="home" class="page-section active" data-page-id="home">
+        <div class="hero-grid">
+          <div class="hero-card hero-card-primary">
+            <p class="eyebrow" data-i18n="homeHeroEyebrow">Materials Engineering Workspace</p>
+            <h2 data-i18n="homeHeroTitle">Run calculations, inspect property data, and explore strengthening models in a single scientific interface.</h2>
+            <p class="hero-copy" data-i18n="homeHeroCopy">
+              This prototype is tuned for quick what-if analysis, classroom explanation, and early-stage research workflows.
+              It balances calculator utility with materials-specific teaching visuals.
+            </p>
+            <div class="hero-actions">
+              <a class="button primary" href="#scientific-calculator" data-page-link="scientific-calculator" data-i18n="homeHeroPrimary">Start Calculating</a>
+              <a class="button secondary" href="#strengthening" data-page-link="strengthening" data-i18n="homeHeroSecondary">Open Strengthening Models</a>
+            </div>
+          </div>
+
+          <div class="hero-card">
+            <div class="metric-grid">
+              <div class="metric-card">
+                <span class="metric-value">7</span>
+                <span class="metric-label" data-i18n="metricModules">Main modules</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-value">10+</span>
+                <span class="metric-label" data-i18n="metricConstants">Constants ready</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-value">18</span>
+                <span class="metric-label" data-i18n="metricElements">Elements seeded</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-value">4</span>
+                <span class="metric-label" data-i18n="metricStrengthening">Strengthening models</span>
+              </div>
+            </div>
+            <div class="workspace-panel">
+              <div class="panel-heading-row">
+                <div>
+                  <h3 data-i18n="workspaceTitle">Research Scratchpad</h3>
+                  <p data-i18n="workspaceCopy">Selections from the constants and elements libraries land here for future calculator workflows.</p>
+                </div>
+                <button id="scratchpad-clear" class="button text-button" type="button" data-i18n="clearAction">Clear</button>
+              </div>
+              <div id="scratchpad-list" class="scratchpad-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" data-i18n="modulesEyebrow">Modules</p>
+            <h2 data-i18n="modulesTitle">Core tools in the prototype</h2>
+          </div>
+        </div>
+
+        <div class="module-card-grid">
+          <article class="module-card">
+            <div class="module-icon">01</div>
+            <h3 data-i18n="homeCardClassicTitle">Classic Calculator</h3>
+            <p data-i18n="homeCardClassicCopy">Use the symbol-first keypad with DEG/RAD switching for quick scientific arithmetic on phones and desktops.</p>
+            <a href="#classic-calculator" class="text-link" data-page-link="classic-calculator" data-i18n="homeCardClassicLink">Open classic panel</a>
+          </article>
+
+          <article class="module-card">
+            <div class="module-icon">02</div>
+            <h3 data-i18n="homeCardCalculatorTitle">Scientific Calculator</h3>
+            <p data-i18n="homeCardCalculatorCopy">Evaluate expressions, run derivatives and integrations, solve roots, and plot one-variable functions.</p>
+            <a href="#scientific-calculator" class="text-link" data-page-link="scientific-calculator" data-i18n="homeCardCalculatorLink">Open module</a>
+          </article>
+
+          <article class="module-card">
+            <div class="module-icon">03</div>
+            <h3 data-i18n="homeCardAnalysisTitle">Function Analysis</h3>
+            <p data-i18n="homeCardAnalysisCopy">Switch between derivative, integral, root-solver, and plotting tools without scrolling through unrelated controls.</p>
+            <a href="#function-analysis" class="text-link" data-page-link="function-analysis" data-i18n="homeCardAnalysisLink">Open analysis</a>
+          </article>
+
+          <article class="module-card">
+            <div class="module-icon">04</div>
+            <h3 data-i18n="homeCardConstantsTitle">Constants Library</h3>
+            <p data-i18n="homeCardConstantsCopy">Search mathematical, physical, and thermodynamic constants with copy and calculator insertion actions.</p>
+            <a href="#constants" class="text-link" data-page-link="constants" data-i18n="homeCardConstantsLink">Browse constants</a>
+          </article>
+
+          <article class="module-card">
+            <div class="module-icon">05</div>
+            <h3 data-i18n="homeCardElementsTitle">Elements Library</h3>
+            <p data-i18n="homeCardElementsCopy">Inspect a curated materials-focused elemental database and compare two elements side by side.</p>
+            <a href="#elements" class="text-link" data-page-link="elements" data-i18n="homeCardElementsLink">Explore elements</a>
+          </article>
+
+          <article class="module-card">
+            <div class="module-icon">06</div>
+            <h3 data-i18n="homeCardStrengthTitle">Materials Strengthening</h3>
+            <p data-i18n="homeCardStrengthCopy">Estimate Hall-Petch, dislocation, cutting, and Orowan contributions with formulas and comparison charts.</p>
+            <a href="#strengthening" class="text-link" data-page-link="strengthening" data-i18n="homeCardStrengthLink">Study strengthening</a>
+          </article>
+
+          <article class="module-card">
+            <div class="module-icon">07</div>
+            <h3 data-i18n="homeCardVisualTitle">Visual Lab</h3>
+            <p data-i18n="homeCardVisualCopy">Run parameter sweeps and live comparison plots to see how key strengthening variables reshape trends.</p>
+            <a href="#visual-lab" class="text-link" data-page-link="visual-lab" data-i18n="homeCardVisualLink">Open visual lab</a>
+          </article>
+        </div>
+      </section>
+
+      <section id="classic-calculator" class="page-section" data-page-id="classic-calculator">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" data-i18n="module01Label">Module 01</p>
+            <h2 data-i18n="classicTitle">Classic Calculator</h2>
+            <p class="section-copy" data-i18n="classicSectionCopy">A keypad-first calculator workspace for quick bilingual calculations on desktop and mobile.</p>
+          </div>
+          <div class="section-tag" data-i18n="classicSectionTag">Keypad-first panel workflow</div>
+        </div>
+
+        <article class="panel classic-panel">
+          <div class="panel-heading-row">
+            <div>
+              <p class="eyebrow" data-i18n="classicEyebrow">Bilingual Module</p>
+              <h3 data-i18n="classicTitle">Classic Calculator</h3>
+              <p class="panel-copy" data-i18n="classicCopy">
+                Symbol-first keypad for bilingual use. Mathematical symbols stay universal while language-specific labels switch cleanly between English and Chinese.
+              </p>
+            </div>
+            <button id="classic-angle-toggle" class="button secondary classic-angle-toggle" type="button">RAD</button>
+          </div>
+
+          <div class="classic-layout">
+            <div class="classic-display-card">
+              <label class="field-label" for="classic-expression" data-i18n="classicExpressionLabel">Expression</label>
+              <math-field
+                id="classic-expression"
+                class="classic-expression-input"
+                virtual-keyboard-mode="manual"
+                spellcheck="false"
+                autocomplete="off"
+                placeholder="Use the symbol-first keypad above or type directly"
+                data-i18n-placeholder="classicExpressionPlaceholder"
+              >
+                \sin(\pi \div 4) + 3^{2}
+              </math-field>
+              <div class="result-banner classic-result-banner">
+                <div>
+                  <span class="mini-label" data-i18n="classicResult">Result</span>
+                  <div id="classic-result" class="result-value classic-result-value">9.707107</div>
+                  <div id="classic-display-meta" class="muted-copy" data-i18n="classicMeta">Symbol-first input with DEG/RAD trig support.</div>
+                </div>
+                <div id="classic-angle-pill" class="result-pill">RAD</div>
+              </div>
+              <div id="classic-message" class="inline-message"></div>
+            </div>
+
+            <div id="classic-keypad" class="classic-keypad" aria-label="Classic calculator keypad" data-i18n-aria-label="classicKeypadAria">
+              <!-- Row 1: Clear, Backspace, (, ), %, n! -->
+              <button class="keypad-button utility" type="button" data-action="clear" data-i18n="classicClear">Clear</button>
+              <button class="keypad-button utility" type="button" data-action="backspace" data-i18n="classicBack">Back</button>
+              <button class="keypad-button function" type="button" data-insert="(">(</button>
+              <button class="keypad-button function" type="button" data-insert=")">)</button>
+              <button class="keypad-button operator" type="button" data-action="percent">%</button>
+              <button class="keypad-button function" type="button" data-action="factorial">n!</button>
+
+              <!-- Row 2: sin, cos, tan, ln, log, |x| -->
+              <button class="keypad-button function" type="button" data-insert="\sin\left(#0\right)" title="sin">sin</button>
+              <button class="keypad-button function" type="button" data-insert="\cos\left(#0\right)" title="cos">cos</button>
+              <button class="keypad-button function" type="button" data-insert="\tan\left(#0\right)" title="tan">tan</button>
+              <button class="keypad-button function" type="button" data-insert="\ln\left(#0\right)" title="ln">ln</button>
+              <button class="keypad-button function" type="button" data-insert="\log\left(#0\right)" title="log">log</button>
+              <button class="keypad-button function" type="button" data-action="absolute">|x|</button>
+
+              <!-- Row 3: π, e, R, k_B, N_A, h -->
+              <button class="keypad-button constant" type="button" data-insert="\pi" title="圆周率 π">π</button>
+              <button class="keypad-button constant" type="button" data-insert="e" title="欧拉常数 e">e</button>
+              <button class="keypad-button constant" type="button" data-insert="R" title="气体常数 R = 8.314 J/(mol·K)">R</button>
+              <button class="keypad-button constant" type="button" data-insert="k_B" title="玻尔兹曼常数 k_B = 1.381e-23 J/K">k<sub>B</sub></button>
+              <button class="keypad-button constant" type="button" data-insert="N_A" title="阿伏伽德罗常数 N_A = 6.022e23 mol⁻¹">N<sub>A</sub></button>
+              <button class="keypad-button constant" type="button" data-insert="h" title="普朗克常数 h = 6.626e-34 J·s">h</button>
+
+              <!-- Row 4: √, x², xʸ, 1/x, c, ħ -->
+              <button class="keypad-button function" type="button" data-insert="\sqrt{#0}" title="Square root √x">√</button>
+              <button class="keypad-button function" type="button" data-action="square" title="x²">x²</button>
+              <button class="keypad-button function" type="button" data-action="power" title="xʸ">x<sup>y</sup></button>
+              <button class="keypad-button function" type="button" data-action="reciprocal" title="1/x">x⁻¹</button>
+              <button class="keypad-button constant" type="button" data-insert="c" title="光速 c = 299792458 m/s">c</button>
+              <button class="keypad-button constant" type="button" data-insert="\hbar" title="约化普朗克常数 ħ = 1.055e-34 J·s">ℏ</button>
+
+              <!-- Row 5: nPr, nCr, ±, 7, 8, 9 -->
+              <button class="keypad-button function" type="button" data-insert="\operatorname{nPr}\left(#0,#0\right)" title="nPr">nPr</button>
+              <button class="keypad-button function" type="button" data-insert="\binom{#0}{#0}" title="nCr">nCr</button>
+              <button class="keypad-button operator" type="button" data-action="toggle-sign">±</button>
+              <button class="keypad-button number" type="button" data-insert="7">7</button>
+              <button class="keypad-button number" type="button" data-insert="8">8</button>
+              <button class="keypad-button number" type="button" data-insert="9">9</button>
+
+              <!-- Row 6: ×, ÷, +, 4, 5, 6 -->
+              <button class="keypad-button operator" type="button" data-insert="*">×</button>
+              <button class="keypad-button operator" type="button" data-insert="/">÷</button>
+              <button class="keypad-button operator" type="button" data-insert="+">+</button>
+              <button class="keypad-button number" type="button" data-insert="4">4</button>
+              <button class="keypad-button number" type="button" data-insert="5">5</button>
+              <button class="keypad-button number" type="button" data-insert="6">6</button>
+
+              <!-- Row 7: -, ., =, 1, 2, 3 -->
+              <button class="keypad-button operator" type="button" data-insert="-">−</button>
+              <button class="keypad-button number" type="button" data-insert=".">.</button>
+              <button class="keypad-button eval" type="button" data-action="evaluate">=</button>
+              <button class="keypad-button number" type="button" data-insert="1">1</button>
+              <button class="keypad-button number" type="button" data-insert="2">2</button>
+              <button class="keypad-button number" type="button" data-insert="3">3</button>
+
+              <!-- Row 8: 0 (full width) -->
+              <button class="keypad-button number span-6" type="button" data-insert="0">0</button>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section id="scientific-calculator" class="page-section" data-page-id="scientific-calculator">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" data-i18n="module02Label">Module 02</p>
+            <h2 data-i18n="calcSectionTitle">Scientific Calculator</h2>
+            <p class="section-copy" data-i18n="calcSectionCopy">
+              Expression evaluation, derivative, integration, root solving, plotting, and Taylor series expansion.
+            </p>
+          </div>
+          <div class="section-tag" data-i18n="calcSectionTag">Radians by default for trigonometric functions</div>
+        </div>
+
+        <div class="calculator-layout scientific-shell">
+          <article class="panel feature-panel">
+            <!-- Tab 切换栏 -->
+            <div class="tab-row" id="calc-tabs" role="tablist" aria-label="Scientific calculator panels" data-i18n-aria-label="calcTabsAria">
+              <button class="tab-button active" type="button" data-calc-tab="evaluate" data-i18n="calcTabEvaluate">Evaluate</button>
+              <button class="tab-button" type="button" data-calc-tab="analysis" data-i18n="calcTabAnalysis">Derivative / Integral / Root</button>
+              <button class="tab-button" type="button" data-calc-tab="symbolic" data-i18n="calcTabSymbolic">Symbolic Calculus</button>
+              <button class="tab-button" type="button" data-calc-tab="plot" data-i18n="calcTabPlot">Plot f(x)</button>
+              <button class="tab-button" type="button" data-calc-tab="taylor" data-i18n="calcTabTaylor">Taylor Series</button>
+            </div>
+
+            <!-- ========== Tab 1: 表达式求值 ========== -->
+            <div class="tab-panel active calc-tab-panel" data-calc-panel="evaluate">
+              <div class="panel-heading-row">
+                <div>
+                  <h3 data-i18n="expressionConsoleTitle">Expression Console</h3>
+                </div>
+                <div class="button-row">
+                  <button id="calc-evaluate" class="button primary" type="button" data-i18n="calcEvaluate">Evaluate</button>
+                  <button id="calc-clear" class="button secondary" type="button" data-i18n="calcReset">Reset</button>
+                </div>
+              </div>
+
+              <div class="field-block">
+                <label class="field-label" for="calc-expression" data-i18n="expressionLabel">Expression</label>
+                <div class="math-editor-container">
+                  <math-field
+                    id="calc-expression"
+                    class="expression-input"
+                    virtual-keyboard-mode="manual"
+                    spellcheck="false"
+                    autocomplete="off"
+                    placeholder="Example: (3.2e3 * sin(pi / 4)) / (R * 298)"
+                    data-i18n-placeholder="calcExpressionPlaceholder"
+                  >(3.2e3 \cdot \sin(\pi / 4)) / (R \cdot 298)</math-field>
+                  <div class="formula-toolbar">
+                    <button type="button" class="toolbar-btn" id="copy-latex" title="Copy LaTeX"><span>📋 LaTeX</span></button>
+                    <button type="button" class="toolbar-btn" id="copy-mathml" title="Copy MathML"><span>📄 MathML</span></button>
+                    <button type="button" class="toolbar-btn" id="copy-text" title="Copy Text"><span>📝 Text</span></button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 科学计算器小键盘 -->
+              <div id="scientific-keypad" class="scientific-keypad calc-inline-keypad" aria-label="Scientific calculator keypad">
+                <button class="keypad-button utility" type="button" data-action="calc-clear" title="Clear">Clear</button>
+                <button class="keypad-button utility" type="button" data-action="calc-backspace" title="Backspace">⌫</button>
+                <button class="keypad-button structure" type="button" data-insert="\frac{#0}{#0}" title="Fraction a/b">a/b</button>
+                <button class="keypad-button structure" type="button" data-insert="\sqrt{#0}" title="Square root √x">√x</button>
+                <button class="keypad-button structure" type="button" data-insert="^{#0}" title="Power x^n">xⁿ</button>
+                <button class="keypad-button structure" type="button" data-insert="_{#0}" title="Subscript x_i">xᵢ</button>
+
+                <button class="keypad-button function" type="button" data-insert="\sin\left(#0\right)" title="sin">sin</button>
+                <button class="keypad-button function" type="button" data-insert="\cos\left(#0\right)" title="cos">cos</button>
+                <button class="keypad-button function" type="button" data-insert="\tan\left(#0\right)" title="tan">tan</button>
+                <button class="keypad-button function" type="button" data-insert="\arcsin\left(#0\right)" title="arcsin">asin</button>
+                <button class="keypad-button function" type="button" data-insert="\arccos\left(#0\right)" title="arccos">acos</button>
+                <button class="keypad-button function" type="button" data-insert="\arctan\left(#0\right)" title="arctan">atan</button>
+
+                <button class="keypad-button function" type="button" data-insert="\ln\left(#0\right)" title="Natural log ln">ln</button>
+                <button class="keypad-button function" type="button" data-insert="\log_{#0}\left(#0\right)" title="Common log log">log</button>
+                <button class="keypad-button function" type="button" data-insert="\exp\left(#0\right)" title="Exponential exp">exp</button>
+                <button class="keypad-button function" type="button" data-insert="\left|#0\right|" title="Absolute |x|">|x|</button>
+                <button class="keypad-button function" type="button" data-insert="\binom{#0}{#0}" title="C(n,k)">C(n,k)</button>
+                <button class="keypad-button function" type="button" data-insert="!" title="Factorial n!">n!</button>
+
+                <!-- 科学/数学常数 -->
+                <button class="keypad-button constant" type="button" data-insert="\pi" title="圆周率 π = 3.14159...">π</button>
+                <button class="keypad-button constant" type="button" data-insert="e" title="自然常数 e = 2.71828...">e</button>
+                <button class="keypad-button constant" type="button" data-insert="c" title="光速 c = 299792458 m/s">c</button>
+                <button class="keypad-button constant" type="button" data-insert="h" title="普朗克常数 h = 6.626e-34 J·s">h</button>
+                <button class="keypad-button constant" type="button" data-insert="\hbar" title="约化普朗克常数 ħ = 1.055e-34 J·s">ℏ</button>
+                <button class="keypad-button constant" type="button" data-insert="R" title="气体常数 R = 8.314 J/(mol·K)">R</button>
+
+                <!-- 物理/化学常数 -->
+                <button class="keypad-button constant" type="button" data-insert="N_A" title="阿伏伽德罗常数 N_A = 6.022e23 mol⁻¹">N<sub>A</sub></button>
+                <button class="keypad-button constant" type="button" data-insert="k_B" title="玻尔兹曼常数 k_B = 1.381e-23 J/K">k<sub>B</sub></button>
+                <button class="keypad-button constant" type="button" data-insert="m_e" title="电子质量 m_e = 9.109e-31 kg">m<sub>e</sub></button>
+                <button class="keypad-button constant" type="button" data-insert="e_{Charge}" title="元电荷 e = 1.602e-19 C">e<sub>Charge</sub></button>
+                <button class="keypad-button constant" type="button" data-insert="\varepsilon_{0}" title="真空介电常数 ε₀ = 8.854e-12 F/m">ε<sub>0</sub></button>
+                <button class="keypad-button constant" type="button" data-insert="\sigma_{SB}" title="Stefan-Boltzmann 常数 σ = 5.670e-8 W/(m²·K⁴)">σ<sub>SB</sub></button>
+
+                <button class="keypad-button operator" type="button" data-insert="(">(</button>
+                <button class="keypad-button operator" type="button" data-insert=")">)</button>
+                <button class="keypad-button number" type="button" data-insert="7">7</button>
+                <button class="keypad-button number" type="button" data-insert="8">8</button>
+                <button class="keypad-button number" type="button" data-insert="9">9</button>
+                <button class="keypad-button operator" type="button" data-insert="/">÷</button>
+
+                <button class="keypad-button operator" type="button" data-insert="+">+</button>
+                <button class="keypad-button operator" type="button" data-insert="-">−</button>
+                <button class="keypad-button number" type="button" data-insert="4">4</button>
+                <button class="keypad-button number" type="button" data-insert="5">5</button>
+                <button class="keypad-button number" type="button" data-insert="6">6</button>
+                <button class="keypad-button operator" type="button" data-insert="*">×</button>
+
+                <button class="keypad-button operator" type="button" data-insert="^">^</button>
+                <button class="keypad-button number" type="button" data-insert=".">.</button>
+                <button class="keypad-button number" type="button" data-insert="1">1</button>
+                <button class="keypad-button number" type="button" data-insert="2">2</button>
+                <button class="keypad-button number" type="button" data-insert="3">3</button>
+                <button class="keypad-button eval" type="button" data-action="calc-evaluate">=</button>
+
+                <button class="keypad-button number span-2" type="button" data-insert="0">0</button>
+                <button class="keypad-button function" type="button" data-insert="e^{#0}">eˣ</button>
+                <button class="keypad-button function" type="button" data-insert="10^{#0}">10ˣ</button>
+                <button class="keypad-button function" type="button" data-insert="^{2}">x²</button>
+                <button class="keypad-button function" type="button" data-insert="^{3}">x³</button>
+              </div>
+
+              <div id="calc-constants-panel" class="constants-panel" aria-label="Physical constants"></div>
+
+              <div class="result-banner">
+                <div>
+                  <span class="mini-label" data-i18n="resultLabel">Result</span>
+                  <div id="calc-result" class="result-value">0.913086</div>
+                  <div id="calc-result-meta" class="muted-copy" data-i18n="calcMeta">Engineering-friendly formatting will appear here.</div>
+                </div>
+                <div class="result-pill" data-i18n="readyLabel">Ready</div>
+              </div>
+              <div id="calc-message" class="inline-message"></div>
+            </div>
+
+            <!-- ========== Tab 2: 函数分析（求导/积分/求根） ========== -->
+            <div class="tab-panel calc-tab-panel" data-calc-panel="analysis">
+              <div class="analysis-sub-tabs">
+                <button class="sub-tab-button active" type="button" data-analysis-tab="derivative" data-i18n="analysisTabDerivative">Derivative</button>
+                <button class="sub-tab-button" type="button" data-analysis-tab="integral" data-i18n="analysisTabIntegral">Integral</button>
+                <button class="sub-tab-button" type="button" data-analysis-tab="root" data-i18n="analysisTabRoot">Root Solver</button>
+              </div>
+
+              <!-- 求导 -->
+              <div class="analysis-content active" data-analysis-panel="derivative">
+                <h4 data-i18n="derivativeTitle">Numerical Derivative</h4>
+                <p class="panel-copy" data-i18n="derivativeCopy">Central-difference estimate of \( f'(x) \).</p>
+                <div class="field-grid two-column">
+                  <label>
+                    <span class="field-label" data-i18n="field_functionFx">Function \( f(x) \)</span>
+                    <math-field id="calc-derivative-expression" class="expression-input" virtual-keyboard-mode="manual">x^{3} - 4x + 1</math-field>
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="field_pointX">Point \( x \)</span>
+                    <input id="calc-derivative-point" type="number" value="2" step="0.1">
+                  </label>
+                </div>
+                <div class="button-row compact">
+                  <button id="calc-derivative-run" class="button primary" type="button" data-i18n="actionCompute">Compute</button>
+                </div>
+                <div id="calc-derivative-output" class="tool-output"></div>
+              </div>
+
+              <!-- 定积分 -->
+              <div class="analysis-content" data-analysis-panel="integral">
+                <h4 data-i18n="integralTitle">Definite Integration</h4>
+                <p class="panel-copy" data-i18n="integralCopy">Simpson integration of \( \int_a^b f(x)\,dx \).</p>
+                <div class="field-grid two-column">
+                  <label>
+                    <span class="field-label" data-i18n="field_functionFx">Function \( f(x) \)</span>
+                    <math-field id="calc-integral-expression" class="expression-input" virtual-keyboard-mode="manual">\exp(-x^{2})</math-field>
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="field_lowerBound">Lower bound \( a \)</span>
+                    <input id="calc-integral-a" type="number" value="0" step="0.1">
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="field_upperBound">Upper bound \( b \)</span>
+                    <input id="calc-integral-b" type="number" value="1" step="0.1">
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="field_subintervals">Subintervals</span>
+                    <input id="calc-integral-steps" type="number" value="400" step="2" min="20">
+                  </label>
+                </div>
+                <div class="button-row compact">
+                  <button id="calc-integral-run" class="button primary" type="button" data-i18n="actionIntegrate">Integrate</button>
+                </div>
+                <div id="calc-integral-output" class="tool-output"></div>
+              </div>
+
+              <!-- 方程求根 -->
+              <div class="analysis-content" data-analysis-panel="root">
+                <h4 data-i18n="rootTitle">Equation Root Finder</h4>
+                <p class="panel-copy" data-i18n="rootCopy">Secant-method estimate for roots of \( f(x)=0 \).</p>
+                <div class="field-grid two-column">
+                  <label>
+                    <span class="field-label" data-i18n="field_functionFx">Function \( f(x) \)</span>
+                    <math-field id="calc-root-expression" class="expression-input" virtual-keyboard-mode="manual">x^{3} - x - 2</math-field>
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="field_initialGuess0">Initial guess \( x_0 \)</span>
+                    <input id="calc-root-x0" type="number" value="1" step="0.1">
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="field_initialGuess1">Initial guess \( x_1 \)</span>
+                    <input id="calc-root-x1" type="number" value="2" step="0.1">
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="field_tolerance">Tolerance</span>
+                    <input id="calc-root-tol" type="number" value="1e-6" step="0.000001">
+                  </label>
+                </div>
+                <div class="button-row compact">
+                  <button id="calc-root-run" class="button primary" type="button" data-i18n="actionFindRoot">Find Root</button>
+                </div>
+                <div id="calc-root-output" class="tool-output"></div>
+              </div>
+            </div>
+
+            <!-- ========== Tab 3: 符号微积分（求导/积分/偏导/微分方程） ========== -->
+            <div class="tab-panel calc-tab-panel" data-calc-panel="symbolic">
+              <div class="analysis-sub-tabs">
+                <button class="sub-tab-button active" type="button" data-symbolic-tab="derivative" data-i18n="symTabDerivative">Derivative</button>
+                <button class="sub-tab-button" type="button" data-symbolic-tab="partial" data-i18n="symTabPartial">Partial Derivative</button>
+                <button class="sub-tab-button" type="button" data-symbolic-tab="integral" data-i18n="symTabIntegral">Integral</button>
+                <button class="sub-tab-button" type="button" data-symbolic-tab="ode" data-i18n="symTabODE">Differential Equation</button>
+              </div>
+
+              <!-- 符号求导 -->
+              <div class="analysis-content active" data-symbolic-panel="derivative">
+                <h4 data-i18n="symDerivativeTitle">Symbolic Derivative</h4>
+                <p class="panel-copy" data-i18n="symDerivativeCopy">Compute the symbolic derivative d/dx of f(x). Supports multi-order derivatives.</p>
+                <div class="field-grid two-column">
+                  <label>
+                    <span class="field-label" data-i18n="symFieldFx">Function f(x)</span>
+                    <math-field id="sym-deriv-expression" class="expression-input" virtual-keyboard-mode="manual">x^3 + 4*x^2 - 3*x + 1</math-field>
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="symFieldVariable">Variable</span>
+                    <input id="sym-deriv-var" type="text" value="x" spellcheck="false">
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="symFieldOrder">Order (nth derivative)</span>
+                    <input id="sym-deriv-order" type="number" value="1" min="1" max="10">
+                  </label>
+                </div>
+                <div class="button-row compact">
+                  <button id="sym-deriv-run" class="button primary" type="button" data-i18n="symActionDerivative">Compute Derivative</button>
+                </div>
+                <div id="sym-deriv-output" class="tool-output"></div>
+              </div>
+
+              <!-- 偏导数 -->
+              <div class="analysis-content" data-symbolic-panel="partial">
+                <h4 data-i18n="symPartialTitle">Partial Derivative</h4>
+                <p class="panel-copy" data-i18n="symPartialCopy">Compute the partial derivative of a multivariate function f(x, y, z, ...).</p>
+                <div class="field-grid two-column">
+                  <label>
+                    <span class="field-label" data-i18n="symFieldFxy">Function f(x, y, ...)</span>
+                    <math-field id="sym-partial-expression" class="expression-input" virtual-keyboard-mode="manual">x^2*y + y^3*z + exp(x*y)</math-field>
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="symFieldDiffVar">Variable to differentiate</span>
+                    <input id="sym-partial-var" type="text" value="x" spellcheck="false">
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="symFieldPartialOrder">Order (nth partial)</span>
+                    <input id="sym-partial-order" type="number" value="1" min="1" max="5">
+                  </label>
+                </div>
+                <div class="button-row compact">
+                  <button id="sym-partial-run" class="button primary" type="button" data-i18n="symActionPartial">Compute Partial</button>
+                  <button id="sym-partial-mixed" class="button secondary" type="button" data-i18n="symActionAllPartials">All First Partials</button>
+                </div>
+                <div id="sym-partial-output" class="tool-output"></div>
+              </div>
+
+              <!-- 符号积分 -->
+              <div class="analysis-content" data-symbolic-panel="integral">
+                <h4 data-i18n="symIntegralTitle">Symbolic Integration</h4>
+                <p class="panel-copy" data-i18n="symIntegralCopy">Compute the indefinite or definite integral \u222Bf(x)dx.</p>
+                <div class="field-grid two-column">
+                  <label>
+                    <span class="field-label" data-i18n="symFieldFx">Function f(x)</span>
+                    <math-field id="sym-integ-expression" class="expression-input" virtual-keyboard-mode="manual">x^3 + sin(x)</math-field>
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="symFieldVariable">Variable</span>
+                    <input id="sym-integ-var" type="text" value="x" spellcheck="false">
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="symFieldLower">Lower bound (leave empty for indefinite)</span>
+                    <input id="sym-integ-lower" type="text" value="" placeholder="e.g. 0">
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="symFieldUpper">Upper bound (leave empty for indefinite)</span>
+                    <input id="sym-integ-upper" type="text" value="" placeholder="e.g. 1">
+                  </label>
+                </div>
+                <div class="button-row compact">
+                  <button id="sym-integ-run" class="button primary" type="button" data-i18n="symActionIntegrate">Integrate</button>
+                </div>
+                <div id="sym-integ-output" class="tool-output"></div>
+              </div>
+
+              <!-- 微分方程 -->
+              <div class="analysis-content" data-symbolic-panel="ode">
+                <h4 data-i18n="symOdeTitle">Ordinary Differential Equation</h4>
+                <p class="panel-copy" data-i18n="symOdeCopy">Solve first-order ODEs symbolically (e.g., y' = f(x, y)). Input the equation and solve for y.</p>
+                <div class="field-grid two-column">
+                  <label>
+                    <span class="field-label" data-i18n="symFieldOdeExpr">ODE: y' = f(x, y)</span>
+                    <input id="sym-ode-expression" type="text" value="x" placeholder="e.g. x, x^2+y, sin(x)*y" spellcheck="false">
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="symFieldIndepVar">Independent variable</span>
+                    <input id="sym-ode-xvar" type="text" value="x" spellcheck="false">
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="symFieldDepVar">Dependent variable</span>
+                    <input id="sym-ode-yvar" type="text" value="y" spellcheck="false">
+                  </label>
+                </div>
+                <div class="button-row compact">
+                  <button id="sym-ode-run" class="button primary" type="button" data-i18n="symActionOde">Solve ODE</button>
+                </div>
+                <div id="sym-ode-output" class="tool-output"></div>
+              </div>
+            </div>
+
+            <!-- ========== Tab 4: 图形绘制 ========== -->
+            <div class="tab-panel calc-tab-panel" data-calc-panel="plot">
+              <div class="panel-heading-row">
+                <div>
+                  <h3 data-i18n="plotterTitle">Function Plotter</h3>
+                  <p class="panel-copy" data-i18n="plotterCopy">Plot \( y=f(x) \) for quick inspection.</p>
+                </div>
+                <div class="button-row">
+                  <button id="calc-plot-run" class="button primary" type="button" data-i18n="actionPlotFunction">Plot</button>
+                </div>
+              </div>
+              <div class="field-grid two-column">
+                <label>
+                  <span class="field-label" data-i18n="field_functionYx">Function \( y(x) \)</span>
+                  <math-field id="calc-plot-expression" class="expression-input" virtual-keyboard-mode="manual">\sin(x) \cdot \exp(-0.1x^{2})</math-field>
+                </label>
+                <label>
+                  <span class="field-label" data-i18n="field_xMin">x minimum</span>
+                  <input id="calc-plot-min" type="number" value="-8" step="1">
+                </label>
+                <label>
+                  <span class="field-label" data-i18n="field_xMax">x maximum</span>
+                  <input id="calc-plot-max" type="number" value="8" step="1">
+                </label>
+                <label>
+                  <span class="field-label" data-i18n="field_points">Points</span>
+                  <input id="calc-plot-points" type="number" value="240" step="10" min="20">
+                </label>
+              </div>
+              <div id="calc-plot-container" class="plot-frame"><div id="calc-plot"></div></div>
+              <div id="calc-plot-output" class="tool-output"></div>
+            </div>
+
+            <!-- ========== Tab 4: Taylor 展开 ========== -->
+            <div class="tab-panel calc-tab-panel" data-calc-panel="taylor">
+              <div class="panel-heading-row">
+                <div>
+                  <h3 data-i18n="taylorTitle">Taylor / Maclaurin Series</h3>
+                  <p class="panel-copy" data-i18n="taylorCopy">Expand \( f(x) \) around a center point. Compare the series approximation with the original function.</p>
+                </div>
+                <div class="button-row">
+                  <button id="calc-taylor-run" class="button primary" type="button" data-i18n="actionTaylorExpand">Expand</button>
+                </div>
+              </div>
+              <div class="field-grid two-column">
+                <label>
+                  <span class="field-label" data-i18n="field_functionFx">Function \( f(x) \)</span>
+                  <math-field id="calc-taylor-expression" class="expression-input" virtual-keyboard-mode="manual">\sin(x)</math-field>
+                </label>
+                <label>
+                  <span class="field-label" data-i18n="taylorCenter">Center \( a \)</span>
+                  <input id="calc-taylor-center" type="number" value="0" step="0.5">
+                </label>
+                <label>
+                  <span class="field-label" data-i18n="taylorOrder">Order (max degree)</span>
+                  <input id="calc-taylor-order" type="number" value="5" step="1" min="1" max="20">
+                </label>
+                <label>
+                  <span class="field-label" data-i18n="field_xMin">x minimum</span>
+                  <input id="calc-taylor-min" type="number" value="-6" step="1">
+                </label>
+                <label>
+                  <span class="field-label" data-i18n="field_xMax">x maximum</span>
+                  <input id="calc-taylor-max" type="number" value="6" step="1">
+                </label>
+              </div>
+              <div id="calc-taylor-series-output" class="tool-output"></div>
+              <div id="calc-taylor-plot-container" class="plot-frame"><div id="calc-taylor-plot"></div></div>
+            </div>
+          </article>
+
+          <article class="panel history-panel">
+            <div class="panel-heading-row">
+              <div>
+                <h3 data-i18n="historyTitle">Recent Calculations</h3>
+                <p data-i18n="historyCopy">Local session history for quick re-use.</p>
+              </div>
+              <button id="calc-history-clear" class="button text-button" type="button" data-i18n="classicClear">Clear</button>
+            </div>
+            <div id="calc-history" class="history-list panel-scroll-region"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="function-analysis" class="page-section" data-page-id="function-analysis">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" data-i18n="module03Label">Module 03</p>
+            <h2 data-i18n="analysisSectionTitle">Function Analysis</h2>
+            <p class="section-copy" data-i18n="analysisSectionCopy">Derivative, integration, root solving, and plotting are separated into focused solver panels so each task stays compact on smaller screens.</p>
+          </div>
+          <div class="section-tag" data-i18n="analysisSectionTag">One focused solver per panel</div>
+        </div>
+
+        <div class="panel panel-workspace">
+          <div class="tab-row" id="analysis-tabs" role="tablist" aria-label="Function analysis panels" data-i18n-aria-label="analysisTabsAria">
+            <button class="tab-button active" type="button" data-analysis-tab="derivative" data-i18n="analysisTabDerivative">Derivative</button>
+            <button class="tab-button" type="button" data-analysis-tab="integral" data-i18n="analysisTabIntegral">Integral</button>
+            <button class="tab-button" type="button" data-analysis-tab="root" data-i18n="analysisTabRoot">Root Solver</button>
+            <button class="tab-button" type="button" data-analysis-tab="plot" data-i18n="analysisTabPlot">Plot</button>
+          </div>
+
+          <div class="analysis-panel-stack">
+            <div class="tab-panel active analysis-tab-panel" data-analysis-panel="derivative">
+              <article class="panel panel-surface">
+                <h3 data-i18n="derivativeTitle">Numerical Derivative</h3>
+                <p class="panel-copy" data-i18n="derivativeCopy">Central-difference estimate of \( f'(x) \).</p>
+                <div class="field-grid two-column">
+                  <label>
+                    <span class="field-label" data-i18n="field_functionFx">Function \( f(x) \)</span>
+                    <math-field id="derivative-expression" class="math-field" virtual-keyboard-mode="manual">
+                      x^{3} - 4x + 1
+                    </math-field>
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="field_pointX">Point \( x \)</span>
+                    <input id="derivative-point" type="number" value="2" step="0.1">
+                  </label>
+                </div>
+
+                <!-- 导数小键盘 -->
+                <div class="scientific-keypad analysis-keypad" aria-label="Derivative formula keypad">
+                  <button class="keypad-button utility" type="button" data-action="clear-field" data-target="derivative-expression">清除</button>
+                  <button class="keypad-button utility" type="button" data-action="backspace-field" data-target="derivative-expression">退格</button>
+                  <button class="keypad-button function" type="button" data-insert="\frac{#?}{#?}" data-target="derivative-expression">\(\frac{a}{b}\)</button>
+                  <button class="keypad-button function" type="button" data-insert="\sqrt{#?}" data-target="derivative-expression">\(\sqrt{x}\)</button>
+                  <button class="keypad-button function" type="button" data-insert="^{#?}" data-target="derivative-expression">\(x^n\)</button>
+                  <button class="keypad-button function" type="button" data-insert="\int_{#?}^{#?} " data-target="derivative-expression">#?\int</button>
+
+                  <button class="keypad-button function" type="button" data-insert="\sin(#?)" data-target="derivative-expression">sin</button>
+                  <button class="keypad-button function" type="button" data-insert="\cos(#?)" data-target="derivative-expression">cos</button>
+                  <button class="keypad-button function" type="button" data-insert="\tan(#?)" data-target="derivative-expression">tan</button>
+                  <button class="keypad-button function" type="button" data-insert="\ln(#?)" data-target="derivative-expression">ln</button>
+                  <button class="keypad-button function" type="button" data-insert="\log_{#?}(#?)" data-target="derivative-expression">log</button>
+                  <button class="keypad-button function" type="button" data-insert="\exp(#?)" data-target="derivative-expression">exp</button>
+
+                  <button class="keypad-button greek" type="button" data-insert="\alpha" data-target="derivative-expression">\(\alpha\)</button>
+                  <button class="keypad-button greek" type="button" data-insert="\beta" data-target="derivative-expression">\(\beta\)</button>
+                  <button class="keypad-button greek" type="button" data-insert="\gamma" data-target="derivative-expression">\(\gamma\)</button>
+                  <button class="keypad-button constant" type="button" data-insert="\pi" data-target="derivative-expression">\(\pi\)</button>
+                  <button class="keypad-button constant" type="button" data-insert="e" data-target="derivative-expression">e</button>
+                  <button class="keypad-button operator" type="button" data-insert="(" data-target="derivative-expression">(</button>
+
+                  <button class="keypad-button operator" type="button" data-insert=")" data-target="derivative-expression">)</button>
+                  <button class="keypad-button number" type="button" data-insert="7" data-target="derivative-expression">7</button>
+                  <button class="keypad-button number" type="button" data-insert="8" data-target="derivative-expression">8</button>
+                  <button class="keypad-button number" type="button" data-insert="9" data-target="derivative-expression">9</button>
+                  <button class="keypad-button operator" type="button" data-insert="+" data-target="derivative-expression">+</button>
+                  <button class="keypad-button operator" type="button" data-insert="-" data-target="derivative-expression">-</button>
+
+                  <button class="keypad-button operator" type="button" data-insert="*" data-target="derivative-expression">*</button>
+                  <button class="keypad-button operator" type="button" data-insert="/" data-target="derivative-expression">/</button>
+                  <button class="keypad-button number" type="button" data-insert="4" data-target="derivative-expression">4</button>
+                  <button class="keypad-button number" type="button" data-insert="5" data-target="derivative-expression">5</button>
+                  <button class="keypad-button number" type="button" data-insert="6" data-target="derivative-expression">6</button>
+                  <button class="keypad-button operator" type="button" data-insert="^" data-target="derivative-expression">^</button>
+
+                  <button class="keypad-button number" type="button" data-insert="." data-target="derivative-expression">.</button>
+                  <button class="keypad-button number" type="button" data-insert="1" data-target="derivative-expression">1</button>
+                  <button class="keypad-button number" type="button" data-insert="2" data-target="derivative-expression">2</button>
+                  <button class="keypad-button number" type="button" data-insert="3" data-target="derivative-expression">3</button>
+                  <button class="keypad-button number span-2" type="button" data-insert="0" data-target="derivative-expression">0</button>
+                </div>
+
+                <div class="button-row compact sticky-actions">
+                  <button id="derivative-run" class="button primary" type="button" data-i18n="actionCompute">Compute</button>
+                  <button id="derivative-reset" class="button secondary" type="button" data-i18n="actionReset">Reset</button>
+                </div>
+                <div id="derivative-output" class="tool-output"></div>
+              </article>
+            </div>
+
+            <div class="tab-panel analysis-tab-panel" data-analysis-panel="integral">
+              <article class="panel panel-surface">
+                <h3 data-i18n="integralTitle">Definite Integration</h3>
+                <p class="panel-copy" data-i18n="integralCopy">Simpson integration of \( \int_a^b f(x)\,dx \).</p>
+                <div class="field-grid two-column">
+                  <label>
+                    <span class="field-label" data-i18n="field_functionFx">Function \( f(x) \)</span>
+                    <math-field id="integral-expression" class="math-field" virtual-keyboard-mode="manual">
+                      \exp(-x^{2})
+                    </math-field>
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="field_lowerBound">Lower bound \( a \)</span>
+                    <input id="integral-a" type="number" value="0" step="0.1">
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="field_upperBound">Upper bound \( b \)</span>
+                    <input id="integral-b" type="number" value="1" step="0.1">
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="field_subintervals">Subintervals</span>
+                    <input id="integral-steps" type="number" value="400" step="2" min="20">
+                  </label>
+                </div>
+
+                <!-- 积分小键盘 -->
+                <div class="scientific-keypad analysis-keypad" aria-label="Integral formula keypad">
+                  <button class="keypad-button utility" type="button" data-action="clear-field" data-target="integral-expression">清除</button>
+                  <button class="keypad-button utility" type="button" data-action="backspace-field" data-target="integral-expression">退格</button>
+                  <button class="keypad-button function" type="button" data-insert="\frac{#?}{#?}" data-target="integral-expression">\(\frac{a}{b}\)</button>
+                  <button class="keypad-button function" type="button" data-insert="\sqrt{#?}" data-target="integral-expression">\(\sqrt{x}\)</button>
+                  <button class="keypad-button function" type="button" data-insert="^{#?}" data-target="integral-expression">\(x^n\)</button>
+                  <button class="keypad-button function" type="button" data-insert="\int_{#?}^{#?} " data-target="integral-expression">#?\int</button>
+
+                  <button class="keypad-button function" type="button" data-insert="\sin(#?)" data-target="integral-expression">sin</button>
+                  <button class="keypad-button function" type="button" data-insert="\cos(#?)" data-target="integral-expression">cos</button>
+                  <button class="keypad-button function" type="button" data-insert="\tan(#?)" data-target="integral-expression">tan</button>
+                  <button class="keypad-button function" type="button" data-insert="\ln(#?)" data-target="integral-expression">ln</button>
+                  <button class="keypad-button function" type="button" data-insert="\log_{#?}(#?)" data-target="integral-expression">log</button>
+                  <button class="keypad-button function" type="button" data-insert="\exp(#?)" data-target="integral-expression">exp</button>
+
+                  <button class="keypad-button greek" type="button" data-insert="\alpha" data-target="integral-expression">\(\alpha\)</button>
+                  <button class="keypad-button greek" type="button" data-insert="\beta" data-target="integral-expression">\(\beta\)</button>
+                  <button class="keypad-button constant" type="button" data-insert="\pi" data-target="integral-expression">\(\pi\)</button>
+                  <button class="keypad-button constant" type="button" data-insert="e" data-target="integral-expression">e</button>
+                  <button class="keypad-button operator" type="button" data-insert="(" data-target="integral-expression">(</button>
+                  <button class="keypad-button operator" type="button" data-insert=")" data-target="integral-expression">)</button>
+
+                  <button class="keypad-button number" type="button" data-insert="7" data-target="integral-expression">7</button>
+                  <button class="keypad-button number" type="button" data-insert="8" data-target="integral-expression">8</button>
+                  <button class="keypad-button number" type="button" data-insert="9" data-target="integral-expression">9</button>
+                  <button class="keypad-button operator" type="button" data-insert="+" data-target="integral-expression">+</button>
+                  <button class="keypad-button operator" type="button" data-insert="-" data-target="integral-expression">-</button>
+                  <button class="keypad-button operator" type="button" data-insert="*" data-target="integral-expression">*</button>
+
+                  <button class="keypad-button operator" type="button" data-insert="/" data-target="integral-expression">/</button>
+                  <button class="keypad-button number" type="button" data-insert="4" data-target="integral-expression">4</button>
+                  <button class="keypad-button number" type="button" data-insert="5" data-target="integral-expression">5</button>
+                  <button class="keypad-button number" type="button" data-insert="6" data-target="integral-expression">6</button>
+                  <button class="keypad-button operator" type="button" data-insert="^" data-target="integral-expression">^</button>
+                  <button class="keypad-button number" type="button" data-insert="." data-target="integral-expression">.</button>
+
+                  <button class="keypad-button number" type="button" data-insert="1" data-target="integral-expression">1</button>
+                  <button class="keypad-button number" type="button" data-insert="2" data-target="integral-expression">2</button>
+                  <button class="keypad-button number" type="button" data-insert="3" data-target="integral-expression">3</button>
+                  <button class="keypad-button number span-2" type="button" data-insert="0" data-target="integral-expression">0</button>
+                </div>
+
+                <div class="button-row compact sticky-actions">
+                  <button id="integral-run" class="button primary" type="button" data-i18n="actionIntegrate">Integrate</button>
+                  <button id="integral-reset" class="button secondary" type="button" data-i18n="actionReset">Reset</button>
+                </div>
+                <div id="integral-output" class="tool-output"></div>
+              </article>
+            </div>
+
+            <div class="tab-panel analysis-tab-panel" data-analysis-panel="root">
+              <article class="panel panel-surface">
+                <h3 data-i18n="rootTitle">Equation Root Finder</h3>
+                <p class="panel-copy" data-i18n="rootCopy">Secant-method estimate for one-variable roots of \( f(x)=0 \).</p>
+                <div class="field-grid two-column">
+                  <label>
+                    <span class="field-label" data-i18n="field_functionFx">Function \( f(x) \)</span>
+                    <math-field id="root-expression" class="math-field" virtual-keyboard-mode="manual">
+                      x^{3} - x - 2
+                    </math-field>
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="field_initialGuess0">Initial guess \( x_0 \)</span>
+                    <input id="root-x0" type="number" value="1" step="0.1">
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="field_initialGuess1">Initial guess \( x_1 \)</span>
+                    <input id="root-x1" type="number" value="2" step="0.1">
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="field_tolerance">Tolerance</span>
+                    <input id="root-tol" type="number" value="1e-6" step="0.000001">
+                  </label>
+                </div>
+
+                <!-- 求根小键盘 -->
+                <div class="scientific-keypad analysis-keypad" aria-label="Root solver formula keypad">
+                  <button class="keypad-button utility" type="button" data-action="clear-field" data-target="root-expression">清除</button>
+                  <button class="keypad-button utility" type="button" data-action="backspace-field" data-target="root-expression">退格</button>
+                  <button class="keypad-button function" type="button" data-insert="\frac{#?}{#?}" data-target="root-expression">\(\frac{a}{b}\)</button>
+                  <button class="keypad-button function" type="button" data-insert="\sqrt{#?}" data-target="root-expression">\(\sqrt{x}\)</button>
+                  <button class="keypad-button function" type="button" data-insert="^{#?}" data-target="root-expression">\(x^n\)</button>
+                  <button class="keypad-button function" type="button" data-insert="\int_{#?}^{#?} " data-target="root-expression">#?\int</button>
+
+                  <button class="keypad-button function" type="button" data-insert="\sin(#?)" data-target="root-expression">sin</button>
+                  <button class="keypad-button function" type="button" data-insert="\cos(#?)" data-target="root-expression">cos</button>
+                  <button class="keypad-button function" type="button" data-insert="\tan(#?)" data-target="root-expression">tan</button>
+                  <button class="keypad-button function" type="button" data-insert="\ln(#?)" data-target="root-expression">ln</button>
+                  <button class="keypad-button function" type="button" data-insert="\log_{#?}(#?)" data-target="root-expression">log</button>
+                  <button class="keypad-button function" type="button" data-insert="\exp(#?)" data-target="root-expression">exp</button>
+
+                  <button class="keypad-button greek" type="button" data-insert="\alpha" data-target="root-expression">\(\alpha\)</button>
+                  <button class="keypad-button greek" type="button" data-insert="\beta" data-target="root-expression">\(\beta\)</button>
+                  <button class="keypad-button constant" type="button" data-insert="\pi" data-target="root-expression">\(\pi\)</button>
+                  <button class="keypad-button constant" type="button" data-insert="e" data-target="root-expression">e</button>
+                  <button class="keypad-button operator" type="button" data-insert="(" data-target="root-expression">(</button>
+                  <button class="keypad-button operator" type="button" data-insert=")" data-target="root-expression">)</button>
+
+                  <button class="keypad-button number" type="button" data-insert="7" data-target="root-expression">7</button>
+                  <button class="keypad-button number" type="button" data-insert="8" data-target="root-expression">8</button>
+                  <button class="keypad-button number" type="button" data-insert="9" data-target="root-expression">9</button>
+                  <button class="keypad-button operator" type="button" data-insert="+" data-target="root-expression">+</button>
+                  <button class="keypad-button operator" type="button" data-insert="-" data-target="root-expression">-</button>
+                  <button class="keypad-button operator" type="button" data-insert="*" data-target="root-expression">*</button>
+
+                  <button class="keypad-button operator" type="button" data-insert="/" data-target="root-expression">/</button>
+                  <button class="keypad-button number" type="button" data-insert="4" data-target="root-expression">4</button>
+                  <button class="keypad-button number" type="button" data-insert="5" data-target="root-expression">5</button>
+                  <button class="keypad-button number" type="button" data-insert="6" data-target="root-expression">6</button>
+                  <button class="keypad-button operator" type="button" data-insert="^" data-target="root-expression">^</button>
+                  <button class="keypad-button number" type="button" data-insert="." data-target="root-expression">.</button>
+
+                  <button class="keypad-button number" type="button" data-insert="1" data-target="root-expression">1</button>
+                  <button class="keypad-button number" type="button" data-insert="2" data-target="root-expression">2</button>
+                  <button class="keypad-button number" type="button" data-insert="3" data-target="root-expression">3</button>
+                  <button class="keypad-button number span-2" type="button" data-insert="0" data-target="root-expression">0</button>
+                </div>
+
+                <div class="button-row compact sticky-actions">
+                  <button id="root-run" class="button primary" type="button" data-i18n="actionFindRoot">Find Root</button>
+                  <button id="root-reset" class="button secondary" type="button" data-i18n="actionReset">Reset</button>
+                </div>
+                <div id="root-output" class="tool-output"></div>
+              </article>
+            </div>
+
+            <div class="tab-panel analysis-tab-panel" data-analysis-panel="plot">
+              <article class="panel panel-surface analysis-plot-panel">
+                <div class="panel-heading-row">
+                  <div>
+                    <h3 data-i18n="plotterTitle">Function Plotter</h3>
+                    <p class="panel-copy" data-i18n="plotterCopy">Plot \( y=f(x) \) for quick inspection.</p>
+                  </div>
+                </div>
+                <div class="field-grid two-column">
+                  <label>
+                    <span class="field-label" data-i18n="field_functionYx">Function \( y(x) \)</span>
+                    <math-field id="plot-expression" class="math-field" virtual-keyboard-mode="manual">
+                      \sin(x) \cdot \exp(-0.1x^{2})
+                    </math-field>
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="field_xMin">x minimum</span>
+                    <input id="plot-min" type="number" value="-8" step="1">
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="field_xMax">x maximum</span>
+                    <input id="plot-max" type="number" value="8" step="1">
+                  </label>
+                  <label>
+                    <span class="field-label" data-i18n="field_points">Points</span>
+                    <input id="plot-points" type="number" value="240" step="10" min="40">
+                  </label>
+                </div>
+
+                <!-- 绘图小键盘 -->
+                <div class="scientific-keypad analysis-keypad" aria-label="Plot formula keypad">
+                  <button class="keypad-button utility" type="button" data-action="clear-field" data-target="plot-expression">清除</button>
+                  <button class="keypad-button utility" type="button" data-action="backspace-field" data-target="plot-expression">退格</button>
+                  <button class="keypad-button function" type="button" data-insert="\frac{#?}{#?}" data-target="plot-expression">\(\frac{a}{b}\)</button>
+                  <button class="keypad-button function" type="button" data-insert="\sqrt{#?}" data-target="plot-expression">\(\sqrt{x}\)</button>
+                  <button class="keypad-button function" type="button" data-insert="^{#?}" data-target="plot-expression">\(x^n\)</button>
+                  <button class="keypad-button function" type="button" data-insert="\int_{#?}^{#?} " data-target="plot-expression">#?\int</button>
+
+                  <button class="keypad-button function" type="button" data-insert="\sin(#?)" data-target="plot-expression">sin</button>
+                  <button class="keypad-button function" type="button" data-insert="\cos(#?)" data-target="plot-expression">cos</button>
+                  <button class="keypad-button function" type="button" data-insert="\tan(#?)" data-target="plot-expression">tan</button>
+                  <button class="keypad-button function" type="button" data-insert="\ln(#?)" data-target="plot-expression">ln</button>
+                  <button class="keypad-button function" type="button" data-insert="\log_{#?}(#?)" data-target="plot-expression">log</button>
+                  <button class="keypad-button function" type="button" data-insert="\exp(#?)" data-target="plot-expression">exp</button>
+
+                  <button class="keypad-button greek" type="button" data-insert="\alpha" data-target="plot-expression">\(\alpha\)</button>
+                  <button class="keypad-button greek" type="button" data-insert="\beta" data-target="plot-expression">\(\beta\)</button>
+                  <button class="keypad-button constant" type="button" data-insert="\pi" data-target="plot-expression">\(\pi\)</button>
+                  <button class="keypad-button constant" type="button" data-insert="e" data-target="plot-expression">e</button>
+                  <button class="keypad-button operator" type="button" data-insert="(" data-target="plot-expression">(</button>
+                  <button class="keypad-button operator" type="button" data-insert=")" data-target="plot-expression">)</button>
+
+                  <button class="keypad-button number" type="button" data-insert="7" data-target="plot-expression">7</button>
+                  <button class="keypad-button number" type="button" data-insert="8" data-target="plot-expression">8</button>
+                  <button class="keypad-button number" type="button" data-insert="9" data-target="plot-expression">9</button>
+                  <button class="keypad-button operator" type="button" data-insert="+" data-target="plot-expression">+</button>
+                  <button class="keypad-button operator" type="button" data-insert="-" data-target="plot-expression">-</button>
+                  <button class="keypad-button operator" type="button" data-insert="*" data-target="plot-expression">*</button>
+
+                  <button class="keypad-button operator" type="button" data-insert="/" data-target="plot-expression">/</button>
+                  <button class="keypad-button number" type="button" data-insert="4" data-target="plot-expression">4</button>
+                  <button class="keypad-button number" type="button" data-insert="5" data-target="plot-expression">5</button>
+                  <button class="keypad-button number" type="button" data-insert="6" data-target="plot-expression">6</button>
+                  <button class="keypad-button operator" type="button" data-insert="^" data-target="plot-expression">^</button>
+                  <button class="keypad-button number" type="button" data-insert="." data-target="plot-expression">.</button>
+
+                  <button class="keypad-button number" type="button" data-insert="1" data-target="plot-expression">1</button>
+                  <button class="keypad-button number" type="button" data-insert="2" data-target="plot-expression">2</button>
+                  <button class="keypad-button number" type="button" data-insert="3" data-target="plot-expression">3</button>
+                  <button class="keypad-button number span-2" type="button" data-insert="0" data-target="plot-expression">0</button>
+                </div>
+
+                <div class="button-row compact sticky-actions">
+                  <button id="plot-run" class="button primary" type="button" data-i18n="actionPlotFunction">Plot Function</button>
+                  <button id="plot-reset" class="button secondary" type="button" data-i18n="actionReset">Reset</button>
+                </div>
+                <div id="plot-output" class="tool-output"></div>
+                <div id="calc-plot" class="plot-frame"></div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="constants" class="page-section" data-page-id="constants">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" data-i18n="module04Label">Module 04</p>
+            <h2 data-i18n="constantsSectionTitle">Constants Library</h2>
+            <p class="section-copy" data-i18n="constantsSectionCopy">A searchable seed dataset of mathematical, physical, and thermodynamic constants for fast reuse.</p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="library-toolbar">
+            <label class="search-field">
+              <span class="field-label" data-i18n="searchConstantsLabel">Search constants</span>
+              <input id="constant-search" type="search" placeholder="Search by name, symbol, alias, or category" data-i18n-placeholder="searchConstantsPlaceholder">
+            </label>
+            <div id="constant-filters" class="chip-row" aria-label="Constant categories" data-i18n-aria-label="constantFiltersAria"></div>
+          </div>
+          <div id="constants-list" class="library-grid panel-scroll-region"></div>
+        </div>
+      </section>
+
+      <section id="elements" class="page-section" data-page-id="elements">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" data-i18n="module05Label">Module 05</p>
+            <h2 data-i18n="elementsSectionTitle">Elements Library</h2>
+            <p class="section-copy" data-i18n="elementsSectionCopy">A materials-focused elemental reference with quick comparison support and future-calculator scratchpad actions.</p>
+          </div>
+          <div class="section-tag" data-i18n="elementsSectionTag">Periodic-table-inspired cards</div>
+        </div>
+
+        <div class="panel panel-workspace">
+          <div class="tab-row" id="element-view-tabs" role="tablist" aria-label="Elements panels" data-i18n-aria-label="elementsTabsAria">
+            <button class="tab-button active" type="button" data-element-panel="library" data-i18n="elementsTabLibrary">Library</button>
+            <button class="tab-button" type="button" data-element-panel="detail" data-i18n="elementsTabDetail">Detail</button>
+            <button class="tab-button" type="button" data-element-panel="compare" data-i18n="elementsTabCompare">Compare</button>
+          </div>
+
+          <div class="element-panel-stack">
+            <div class="tab-panel active element-tab-panel" data-element-view="library">
+              <article class="panel panel-surface">
+                <div class="library-toolbar">
+                  <label class="search-field">
+                    <span class="field-label" data-i18n="searchElementsLabel">Search elements</span>
+                    <input id="element-search" type="search" placeholder="Search by symbol, name, crystal structure, or notes" data-i18n-placeholder="searchElementsPlaceholder">
+                  </label>
+                  <div class="muted-copy" data-i18n="elementsHint">Click a card to inspect details and stage comparisons.</div>
+                </div>
+                <div id="elements-grid" class="elements-grid panel-scroll-region"></div>
+              </article>
+            </div>
+
+            <div class="tab-panel element-tab-panel" data-element-view="detail">
+              <article class="panel panel-surface" id="element-detail-panel">
+                <div class="panel-heading-row">
+                  <div>
+                    <h3 data-i18n="elementDetailTitle">Element Detail</h3>
+                    <p data-i18n="elementDetailCopy">Select a card to inspect materials-relevant properties.</p>
+                  </div>
+                </div>
+                <div id="element-detail" class="detail-placeholder panel-scroll-region" data-i18n="elementDetailPlaceholder">Choose an element to populate this panel.</div>
+              </article>
+            </div>
+
+            <div class="tab-panel element-tab-panel" data-element-view="compare">
+              <article class="panel panel-surface">
+                <div class="panel-heading-row">
+                  <div>
+                    <h3 data-i18n="compareTitle">Compare Two Elements</h3>
+                    <p data-i18n="compareCopy">Set comparison slots A and B from the detail panel.</p>
+                  </div>
+                  <button id="comparison-clear" class="button text-button" type="button" data-i18n="clearAction">Clear</button>
+                </div>
+                <div id="element-compare" class="compare-grid panel-scroll-region"></div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="strengthening" class="page-section" data-page-id="strengthening">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" data-i18n="module06Label">Module 06</p>
+            <h2 data-i18n="strengthSectionTitle">Materials Strengthening</h2>
+            <p class="section-copy" data-i18n="strengthSectionCopy">
+              Educational engineering models for microstructural strengthening. Inputs are user-editable, formulas are rendered,
+              and outputs can be compared directly.
+            </p>
+          </div>
+        </div>
+
+        <div class="panel scratchpad-panel">
+          <div class="panel-heading-row">
+            <div>
+              <h3 data-i18n="materialsWorkspaceTitle">Materials Workspace</h3>
+              <p data-i18n="materialsWorkspaceCopy">Queued constants and element properties appear here to support future material calculators and teaching workflows.</p>
+            </div>
+          </div>
+          <div id="materials-scratchpad" class="scratchpad-list"></div>
+        </div>
+
+        <div class="panel">
+          <div class="tab-row" id="strength-tabs" role="tablist" aria-label="Strengthening models" data-i18n-aria-label="strengthTabsAria">
+            <button class="tab-button active" type="button" data-tab="hall-petch" data-i18n="tabHallPetch">Hall-Petch</button>
+            <button class="tab-button" type="button" data-tab="dislocation" data-i18n="tabDislocation">Dislocation</button>
+            <button class="tab-button" type="button" data-tab="cutting" data-i18n="tabCutting">Cutting</button>
+            <button class="tab-button" type="button" data-tab="orowan" data-i18n="tabOrowan">Orowan</button>
+            <button class="tab-button" type="button" data-tab="comparison" data-i18n="tabComparison">Comparison</button>
+          </div>
+
+          <div class="tab-panels">
+            <div class="tab-panel active" id="tab-hall-petch" data-strength-panel="hall-petch">
+              <div class="model-layout">
+                <article class="model-panel">
+                  <div class="formula-card">
+                    <h3 data-i18n="hpTitle">Hall-Petch Strengthening</h3>
+                    <div class="formula-text">\( \Delta \sigma_{HP} = k_y d^{-1/2}, \qquad \sigma_y = \sigma_0 + k_y d^{-1/2} \)</div>
+                    <p data-i18n="hpCopy">Use a base friction stress and a Hall-Petch coefficient to estimate the grain-size contribution to yield strength.</p>
+                  </div>
+                  <div class="field-grid three-column">
+                    <label>
+                      <span class="field-label" data-i18n="field_baseStress">Base stress \( \sigma_0 \)</span>
+                      <input id="hp-sigma0" type="number" value="180" step="1">
+                    </label>
+                    <label>
+                      <span class="field-label" data-i18n="field_stressUnit">Stress unit</span>
+                      <select id="hp-sigma0-unit">
+                        <option value="MPa">MPa</option>
+                        <option value="GPa">GPa</option>
+                      </select>
+                    </label>
+                    <label>
+                      <span class="field-label" data-i18n="field_hallPetchCoefficient">\( k_y \) [MPa*m\(^{1/2}\)]</span>
+                      <input id="hp-ky" type="number" value="0.7" step="0.01">
+                    </label>
+                    <label>
+                      <span class="field-label" data-i18n="field_grainSize">Grain size \( d \)</span>
+                      <input id="hp-grain-size" type="number" value="12" step="0.1">
+                    </label>
+                    <label>
+                      <span class="field-label" data-i18n="field_grainUnit">Grain size unit</span>
+                      <select id="hp-grain-unit">
+                        <option value="um">um</option>
+                        <option value="mm">mm</option>
+                        <option value="m">m</option>
+                        <option value="nm">nm</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div class="button-row compact sticky-actions">
+                    <button id="hp-run" class="button primary" type="button" data-i18n="actionUpdateModel">Update Model</button>
+                    <button id="hp-reset" class="button secondary" type="button" data-i18n="actionReset">Reset</button>
+                  </div>
+                  <div id="hp-output" class="model-output-grid"></div>
+                </article>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="tab-dislocation" data-strength-panel="dislocation">
+              <div class="model-layout">
+                <article class="model-panel">
+                  <div class="formula-card">
+                    <h3 data-i18n="disTitle">Dislocation Strengthening</h3>
+                    <div class="formula-text">\( \Delta \sigma_{dis} = \alpha G b \sqrt{\rho} \)</div>
+                    <p data-i18n="disCopy">A compact Taylor-style estimate using shear modulus, Burgers vector, and dislocation density.</p>
+                  </div>
+                  <div class="field-grid three-column">
+                    <label>
+                      <span class="field-label" data-i18n="field_alpha">\( \alpha \)</span>
+                      <input id="dis-alpha" type="number" value="0.24" step="0.01">
+                    </label>
+                    <label>
+                      <span class="field-label" data-i18n="field_shearModulus">Shear modulus \( G \) [GPa]</span>
+                      <input id="dis-G" type="number" value="79" step="0.1">
+                    </label>
+                    <label>
+                      <span class="field-label" data-i18n="field_burgersVector">Burgers vector \( b \) [nm]</span>
+                      <input id="dis-b" type="number" value="0.248" step="0.001">
+                    </label>
+                    <label>
+                      <span class="field-label" data-i18n="field_dislocationDensity">Dislocation density \( \rho \) [m\(^{-2}\)]</span>
+                      <input id="dis-rho" type="number" value="2.0e14" step="1e13">
+                    </label>
+                  </div>
+                  <div class="button-row compact sticky-actions">
+                    <button id="dis-run" class="button primary" type="button" data-i18n="actionUpdateModel">Update Model</button>
+                    <button id="dis-reset" class="button secondary" type="button" data-i18n="actionReset">Reset</button>
+                  </div>
+                  <div id="dis-output" class="model-output-grid"></div>
+                </article>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="tab-cutting" data-strength-panel="cutting">
+              <div class="model-layout with-plot">
+                <article class="model-panel">
+                  <div class="formula-card">
+                    <h3 data-i18n="cutTitle">Cutting / Shearing-Based Precipitate Strengthening</h3>
+                    <div class="formula-text">\( \Delta \sigma_{cut} = k_c G \sqrt{f} \left(\frac{b}{r}\right)^{1/2} \left(\frac{\gamma_{APB}}{G b}\right)^{1/2} \)</div>
+                    <p data-i18n="cutCopy">This simplified educational model blends volume fraction, precipitate size, and APB energy into a qualitative strength estimate.</p>
+                  </div>
+                  <div class="field-grid three-column">
+                    <label>
+                      <span class="field-label" data-i18n="field_precipitateRadius">Radius \( r \) [nm]</span>
+                      <input id="cut-radius" type="number" value="12" step="0.1">
+                    </label>
+                    <label>
+                      <span class="field-label" data-i18n="field_volumeFraction">Volume fraction \( f \)</span>
+                      <input id="cut-fraction" type="number" value="0.08" step="0.01" min="0.001" max="0.6">
+                    </label>
+                    <label>
+                      <span class="field-label" data-i18n="field_apbEnergy">\( \gamma_{APB} \) [mJ/m\(^2\)]</span>
+                      <input id="cut-apb" type="number" value="150" step="1">
+                    </label>
+                    <label>
+                      <span class="field-label" data-i18n="field_shearModulus">Shear modulus \( G \) [GPa]</span>
+                      <input id="cut-G" type="number" value="80" step="0.1">
+                    </label>
+                    <label>
+                      <span class="field-label" data-i18n="field_burgersVector">Burgers vector \( b \) [nm]</span>
+                      <input id="cut-b" type="number" value="0.255" step="0.001">
+                    </label>
+                    <label>
+                      <span class="field-label" data-i18n="field_cuttingCoefficient">Coefficient \( k_c \)</span>
+                      <input id="cut-k" type="number" value="0.75" step="0.01">
+                    </label>
+                  </div>
+                  <div class="button-row compact sticky-actions">
+                    <button id="cut-run" class="button primary" type="button" data-i18n="actionUpdateModel">Update Model</button>
+                    <button id="cut-reset" class="button secondary" type="button" data-i18n="actionReset">Reset</button>
+                  </div>
+                  <div id="cut-output" class="model-output-grid"></div>
+                </article>
+                <div id="cut-plot" class="plot-frame tall-plot"></div>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="tab-orowan" data-strength-panel="orowan">
+              <div class="model-layout with-plot">
+                <article class="model-panel">
+                  <div class="formula-card">
+                    <h3 data-i18n="orTitle">Orowan Bypass Strengthening</h3>
+                    <div class="formula-text">\( \Delta \sigma_{Or} = \frac{0.4 G b}{\pi \lambda \sqrt{1-\nu}} \ln \left(\frac{r}{b}\right) \)</div>
+                    <p data-i18n="orCopy">Estimate the bypass strengthening when dislocations loop between particles instead of cutting them.</p>
+                  </div>
+                  <div class="field-grid three-column">
+                    <label>
+                      <span class="field-label" data-i18n="field_shearModulus">Shear modulus \( G \) [GPa]</span>
+                      <input id="or-G" type="number" value="80" step="0.1">
+                    </label>
+                    <label>
+                      <span class="field-label" data-i18n="field_burgersVector">Burgers vector \( b \) [nm]</span>
+                      <input id="or-b" type="number" value="0.255" step="0.001">
+                    </label>
+                    <label>
+                      <span class="field-label" data-i18n="field_precipitateRadius">Precipitate radius \( r \) [nm]</span>
+                      <input id="or-radius" type="number" value="18" step="0.1">
+                    </label>
+                    <label>
+                      <span class="field-label" data-i18n="field_interparticleSpacing">Spacing \( \lambda \) [nm]</span>
+                      <input id="or-spacing" type="number" value="60" step="0.5">
+                    </label>
+                    <label>
+                      <span class="field-label" data-i18n="field_poissonRatio">Poisson ratio \( \nu \)</span>
+                      <input id="or-nu" type="number" value="0.30" step="0.01" min="0.05" max="0.45">
+                    </label>
+                  </div>
+                  <div class="button-row compact sticky-actions">
+                    <button id="or-run" class="button primary" type="button" data-i18n="actionUpdateModel">Update Model</button>
+                    <button id="or-reset" class="button secondary" type="button" data-i18n="actionReset">Reset</button>
+                  </div>
+                  <div id="or-output" class="model-output-grid"></div>
+                </article>
+                <div id="or-plot" class="plot-frame tall-plot"></div>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="tab-comparison" data-strength-panel="comparison">
+              <div class="comparison-layout">
+                <article class="panel comparison-summary">
+                  <div class="formula-card">
+                    <h3 data-i18n="comparisonPanelTitle">Strengthening Comparison</h3>
+                    <p data-i18n="comparisonPanelCopy">Compare the current contributions from the four models using the active input values above.</p>
+                  </div>
+                  <div id="comparison-summary-text" class="summary-text"></div>
+                  <div id="comparison-table" class="summary-table"></div>
+                </article>
+                <div id="comparison-plot" class="plot-frame comparison-plot"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 自定义公式编辑器 -->
+        <div class="panel">
+          <div class="panel-heading-row">
+            <div>
+              <h3 data-i18n="customFormulaTitle">Custom Formula Editor</h3>
+              <p class="panel-copy" data-i18n="customFormulaCopy">Create and manage custom strengthening formulas with parameter management.</p>
+            </div>
+          </div>
+
+          <div class="field-grid two-column">
+            <label>
+              <span class="field-label" data-i18n="formulaName">Formula Name</span>
+              <input id="custom-formula-name" type="text" placeholder="My Custom Formula">
+            </label>
+            <label>
+              <span class="field-label" data-i18n="selectPreset">Select Preset Template</span>
+              <select id="formula-preset-select">
+                <option value="">-- Select a preset --</option>
+                <option value="solid_solution">Solid Solution Strengthening</option>
+                <option value="orowan">Orowan Precipitation Strengthening</option>
+                <option value="hall_petch">Hall-Petch Grain Boundary Strengthening</option>
+                <option value="dislocation">Dislocation Strengthening</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            <span class="field-label" data-i18n="formulaExpression">Formula Expression (LaTeX)</span>
+            <math-field id="custom-formula-latex" class="expression-input" virtual-keyboard-mode="manual">
+              \Delta\sigma = k \cdot x^{n}
+            </math-field>
+          </label>
+
+          <label>
+            <span class="field-label" data-i18n="calculationExpression">Calculation Expression (JavaScript)</span>
+            <input id="custom-formula-expression" type="text" placeholder="k * Math.pow(x, n)" value="k * Math.pow(x, n)">
+          </label>
+
+          <!-- 参数面板 -->
+          <div id="custom-parameters-panel" class="parameters-panel">
+            <h4 data-i18n="formulaParameters">Formula Parameters</h4>
+            <div id="parameters-list" class="parameters-list"></div>
+          </div>
+
+          <div class="button-row compact sticky-actions">
+            <button id="calculate-custom-formula" class="button primary" type="button" data-i18n="actionCalculate">Calculate</button>
+            <button id="save-custom-formula" class="button secondary" type="button" data-i18n="actionSaveFormula">Save Formula</button>
+            <button id="load-custom-formula" class="button secondary" type="button" data-i18n="actionLoadFormula">Load Formula</button>
+            <button id="clear-custom-formula" class="button secondary" type="button" data-i18n="actionClear">Clear</button>
+          </div>
+
+          <div id="custom-formula-result" class="model-output-grid"></div>
+
+          <!-- 已保存的公式列表 -->
+          <div class="saved-formulas-section">
+            <h4 data-i18n="savedFormulas">Saved Formulas</h4>
+            <div id="saved-formulas-list" class="saved-formulas-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="visual-lab" class="page-section" data-page-id="visual-lab">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" data-i18n="module07Label">Module 07</p>
+            <h2 data-i18n="visualSectionTitle">Visual Lab</h2>
+            <p class="section-copy" data-i18n="visualSectionCopy">Interactive parameter sweeps and live comparison graphics for strengthening intuition.</p>
+          </div>
+        </div>
+
+        <div class="visual-layout panel-workspace">
+          <article class="panel visual-control-panel">
+            <div class="panel-heading-row">
+              <div>
+                <h3 data-i18n="visualControlTitle">Parameter Sweep Controls</h3>
+                <p data-i18n="visualControlCopy">Choose one variable to sweep while keeping the rest fixed at the form values.</p>
+              </div>
+            </div>
+
+            <div class="field-grid two-column">
+              <label>
+                <span class="field-label" data-i18n="field_sweepTarget">Sweep target</span>
+                <select id="visual-sweep-target">
+                  <option value="hallPetch" data-i18n="sweepOptionHallPetch">Hall-Petch grain size</option>
+                  <option value="cutting" data-i18n="sweepOptionCutting">Cutting precipitate radius</option>
+                  <option value="orowan" data-i18n="sweepOptionOrowan">Orowan spacing</option>
+                </select>
+              </label>
+              <label>
+                <span class="field-label" data-i18n="field_minValue">Minimum value</span>
+                <input id="visual-min" type="number" value="2" step="0.1">
+              </label>
+              <label>
+                <span class="field-label" data-i18n="field_maxValue">Maximum value</span>
+                <input id="visual-max" type="number" value="80" step="0.1">
+              </label>
+              <label>
+                <span class="field-label" data-i18n="field_samples">Samples</span>
+                <input id="visual-steps" type="number" value="60" step="5" min="10">
+              </label>
+              <label>
+                <span class="field-label" data-i18n="field_radiusSlider">Radius slider [nm]</span>
+                <input id="visual-radius" type="range" min="2" max="80" value="18" step="1">
+                <span id="visual-radius-readout" class="slider-readout">18 nm</span>
+              </label>
+              <label>
+                <span class="field-label" data-i18n="field_spacingSlider">Spacing slider [nm]</span>
+                <input id="visual-spacing" type="range" min="20" max="200" value="60" step="2">
+                <span id="visual-spacing-readout" class="slider-readout">60 nm</span>
+              </label>
+            </div>
+
+            <div class="button-row compact sticky-actions">
+              <button id="visual-run" class="button primary" type="button" data-i18n="actionUpdateVisuals">Update Visuals</button>
+              <button id="visual-reset" class="button secondary" type="button" data-i18n="actionReset">Reset</button>
+            </div>
+          </article>
+
+          <div class="panel visual-output-panel">
+            <div class="tab-row" id="visual-tabs" role="tablist" aria-label="Visual lab panels" data-i18n-aria-label="visualTabsAria">
+              <button class="tab-button active" type="button" data-visual-panel="sweep" data-i18n="visualTabSweep">Sweep Plot</button>
+              <button class="tab-button" type="button" data-visual-panel="compare" data-i18n="visualTabCompare">Mechanism Compare</button>
+              <button class="tab-button" type="button" data-visual-panel="schematic" data-i18n="visualTabSchematic">Schematic</button>
+            </div>
+
+            <div class="visual-panel-stack">
+              <div class="tab-panel active visual-tab-panel" data-visual-view="sweep">
+                <div id="visual-sweep-plot" class="plot-frame"></div>
+              </div>
+
+              <div class="tab-panel visual-tab-panel" data-visual-view="compare">
+                <div id="visual-comparison-plot" class="plot-frame"></div>
+              </div>
+
+              <div class="tab-panel visual-tab-panel" data-visual-view="schematic">
+                <article class="panel panel-surface visual-schematic-panel">
+                  <div class="panel-heading-row">
+                    <div>
+                      <h3 data-i18n="visualSchematicTitle">Precipitate Spacing Schematic</h3>
+                      <p data-i18n="visualSchematicCopy">A simple live sketch to connect slider changes with obstacle size and spacing.</p>
+                    </div>
+                  </div>
+                  <div class="schematic-stage">
+                    <svg id="precipitate-schematic" viewBox="0 0 600 180" aria-label="Precipitate spacing schematic" data-i18n-aria-label="schematicAria"></svg>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <nav class="mobile-nav" aria-label="Workspace navigation" data-i18n-aria-label="mobileNavAria">
+        <button class="mobile-nav-button active" type="button" data-page="home" data-i18n="navHome">Home</button>
+        <button class="mobile-nav-button" type="button" data-page="classic-calculator" data-i18n="navClassic">Classic Calculator</button>
+        <button class="mobile-nav-button" type="button" data-page="scientific-calculator" data-i18n="navScientific">Scientific Calculator</button>
+        <button class="mobile-nav-button" type="button" data-page="function-analysis" data-i18n="navAnalysis">Function Analysis</button>
+        <button class="mobile-nav-button" type="button" data-page="constants" data-i18n="navConstants">Constants Library</button>
+        <button class="mobile-nav-button" type="button" data-page="elements" data-i18n="navElements">Elements Library</button>
+        <button class="mobile-nav-button" type="button" data-page="strengthening" data-i18n="navStrengthening">Materials Strengthening</button>
+        <button class="mobile-nav-button" type="button" data-page="visual-lab" data-i18n="navVisual">Visual Lab</button>
+      </nav>
+
+      <footer class="footer-note" data-i18n="footerNote">
+        Prototype for scientific exploration and educational calculation. Engineering decisions should still be validated against
+        literature, calibrated models, and experimentally grounded inputs.
+      </footer>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

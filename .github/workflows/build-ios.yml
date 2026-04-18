@@ -1,0 +1,89 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web assets
+        run: npm run build
+
+      - name: Add iOS platform
+        run: npx cap add ios
+
+      - name: Sync Capacitor
+        run: npx cap sync ios
+
+      - name: Install Apple certificates and provisioning profile
+        uses: apple-actions/import-codesign-certs@v2
+        with:
+          p12-file-base64: ${{ secrets.P12_BASE64 }}
+          p12-password: ${{ secrets.P12_PASSWORD }}
+
+      - name: Install provisioning profile
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "${{ secrets.PROVISION_PROFILE_BASE64 }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+
+      - name: Build IPA (unsigned for testing, or signed with certificates)
+        run: |
+          cd ios/App
+          # 如果有证书和 profile，使用签名构建
+          if [ -n "${{ secrets.P12_BASE64 }}" ]; then
+            xcodebuild -workspace App.xcworkspace \
+              -scheme App \
+              -configuration Release \
+              -archivePath build/App.xcarchive \
+              -allowProvisioningUpdates \
+              archive \
+              CODE_SIGN_STYLE=Manual \
+              PROVISIONING_PROFILE_SPECIFIER="${{ secrets.PROVISION_PROFILE_NAME }}"
+            # 导出 IPA
+            xcodebuild -exportArchive \
+              -archivePath build/App.xcarchive \
+              -exportOptionsPlist ExportOptions.plist \
+              -exportPath build/output
+          else
+            # 无签名构建（仅限模拟器，真机需要签名）
+            echo "::warning::No signing certificates found. Building for Simulator only."
+            xcodebuild -workspace App.xcworkspace \
+              -scheme App \
+              -configuration Release \
+              -sdk iphonesimulator \
+              -derivedDataPath build \
+              CODE_SIGN_IDENTITY="" \
+              CODE_SIGNING_REQUIRED=NO
+          fi
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build
+          path: |
+            ios/App/build/output/*.ipa
+            ios/App/build/*.xcarchive
+          if-no-files-found: warn
+
+      - name: Upload Simulator build (fallback)
+        if: steps.upload-ipa.outcome == 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-simulator-build
+          path: ios/App/build/Build/Products/Release-iphonesimulator/*.app
+          if-no-files-found: warn

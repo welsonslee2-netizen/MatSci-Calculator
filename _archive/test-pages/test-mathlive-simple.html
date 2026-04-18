@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MathLive 测试</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f7fa;
+    }
+    h1 { color: #1f5e87; }
+    .box {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .success {
+      background: #d4edda;
+      color: #155724;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    math-field {
+      display: block;
+      font-size: 24px;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      margin: 15px 0;
+      background: white;
+    }
+    button {
+      background: #1f5e87;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover { background: #174a6b; }
+    .output {
+      background: #f8f9fa;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      display: none;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 MathLive 测试</h1>
+  
+  <div id="status"></div>
+  
+  <div class="box">
+    <h2>测试 1：基础公式</h2>
+    <p>如果 MathLive 正常工作，下面应该显示渲染后的数学公式（x² + sin(π/4)），而不是纯文本。</p>
+    
+    <math-field id="mf1">
+      x^{2} + \sin\left(\frac{\pi}{4}\right)
+    </math-field>
+    
+    <button onclick="showLatex('mf1')">显示 LaTeX</button>
+    <div id="out-mf1" class="output"></div>
+  </div>
+  
+  <div class="box">
+    <h2>测试 2：积分公式</h2>
+    
+    <math-field id="mf2">
+      \int_{0}^{\infty} e^{-x^{2}} dx
+    </math-field>
+    
+    <button onclick="showLatex('mf2')">显示 LaTeX</button>
+    <div id="out-mf2" class="output"></div>
+  </div>
+  
+  <!-- MathLive - 使用 UMD 版本（更可靠） -->
+  <script src="https://unpkg.com/mathlive@0.98.4/dist/mathlive.min.js"></script>
+  
+  <script>
+    console.log('=== MathLive 加载检查 ===');
+    
+    // 检查是否加载成功
+    if (window.MathfieldElement) {
+      console.log('✅ MathLive 加载成功');
+      document.getElementById('status').innerHTML = 
+        '<div class="success">✅ MathLive 库已成功加载！公式应该正确显示。</div>';
+    } else {
+      console.error('❌ MathLive 未加载');
+      document.getElementById('status').innerHTML = 
+        '<div class="error">❌ MathLive 库加载失败。请检查网络连接或刷新页面。</div>';
+    }
+    
+    // 检查 math-field 元素
+    var fields = document.querySelectorAll('math-field');
+    console.log('找到 ' + fields.length + ' 个 math-field 元素');
+    
+    fields.forEach(function(field) {
+      console.log('ID:', field.id);
+      console.log('Constructor:', field.constructor.name);
+      console.log('Value:', field.value);
+    });
+    
+    // 显示 LaTeX 函数
+    window.showLatex = function(id) {
+      var field = document.getElementById(id);
+      var output = document.getElementById('out-' + id);
+      
+      if (!field || !output) {
+        console.error('找不到元素:', id);
+        return;
+      }
+      
+      output.style.display = 'block';
+      output.innerHTML = '<strong>LaTeX 代码:</strong><br>' + field.value;
+    };
+  </script>
+</body>
+</html>

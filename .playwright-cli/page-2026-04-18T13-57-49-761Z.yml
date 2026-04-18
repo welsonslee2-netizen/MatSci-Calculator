@@ -1,0 +1,158 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: MS
+        - generic [ref=e6]:
+          - paragraph [ref=e7]: Scientific Prototype
+          - heading "MatSci Calculator Lab" [level=1] [ref=e8]
+          - paragraph [ref=e9]: Materials computation, reference data, and strengthening analysis in one local dashboard.
+      - generic [ref=e10]:
+        - generic [ref=e11]: Language
+        - group "Language" [ref=e12]:
+          - button "EN" [ref=e13] [cursor=pointer]
+          - button "中文" [ref=e14] [cursor=pointer]
+      - generic [ref=e15]:
+        - paragraph [ref=e16]: Workspaces
+        - navigation "Primary navigation" [ref=e17]:
+          - button "Home" [ref=e18] [cursor=pointer]
+          - button "Classic Calculator" [ref=e19] [cursor=pointer]
+          - button "Scientific Calculator" [active] [ref=e20] [cursor=pointer]
+          - button "Function Analysis" [ref=e21] [cursor=pointer]
+          - button "Constants Library" [ref=e22] [cursor=pointer]
+          - button "Elements Library" [ref=e23] [cursor=pointer]
+          - button "Materials Strengthening" [ref=e24] [cursor=pointer]
+          - button "Visual Lab" [ref=e25] [cursor=pointer]
+      - generic [ref=e26]:
+        - generic [ref=e27]: Prototype v1
+        - paragraph [ref=e28]: Built with plain HTML, CSS, and JavaScript for lightweight local use with no backend.
+    - main [ref=e29]:
+      - text: Toggle Virtual Keyboard Menu
+      - generic [ref=e100]:
+        - generic [ref=e101]:
+          - generic [ref=e102]:
+            - paragraph [ref=e103]: Module 02
+            - heading "Scientific Calculator" [level=2] [ref=e104]
+            - paragraph [ref=e105]: Supports expression evaluation, scientific notation, common physical constants, and practical one-variable numerical tools.
+          - generic [ref=e106]: Radians by default for trigonometric functions
+        - generic [ref=e107]:
+          - article [ref=e108]:
+            - tablist "calcTabsAria" [ref=e109]:
+              - button "Evaluate" [ref=e110] [cursor=pointer]
+              - button "Derivative / Integral / Root" [ref=e111] [cursor=pointer]
+              - button "Symbolic Calculus" [ref=e112] [cursor=pointer]
+              - button "Plot f(x)" [ref=e113] [cursor=pointer]
+              - button "Taylor Series" [ref=e114] [cursor=pointer]
+            - generic [ref=e115]:
+              - generic [ref=e116]:
+                - heading "Expression Console" [level=3] [ref=e118]
+                - generic [ref=e119]:
+                  - button "Evaluate" [ref=e120] [cursor=pointer]
+                  - button "Reset" [ref=e121] [cursor=pointer]
+              - generic [ref=e122]:
+                - generic [ref=e123]: Expression
+                - generic [ref=e124]:
+                  - generic [ref=e126]:
+                    - textbox
+                    - generic [ref=e127]:
+                      - generic [ref=e130]:
+                        - text: (3.2e3 ⋅
+                        - generic [ref=e131]: sin
+                        - generic [ref=e132]: (π/4)
+                        - text: )/(R ⋅ 298)
+                      - generic: Toggle Virtual Keyboard Menu
+                    - generic [ref=e133]:
+                      - status
+                  - generic [ref=e134]:
+                    - button "📋 LaTeX" [ref=e135] [cursor=pointer]:
+                      - generic [ref=e136]: 📋 LaTeX
+                    - button "📄 MathML" [ref=e137] [cursor=pointer]:
+                      - generic [ref=e138]: 📄 MathML
+                    - button "📝 Text" [ref=e139] [cursor=pointer]:
+                      - generic [ref=e140]: 📝 Text
+              - generic "Scientific calculator keypad" [ref=e141]:
+                - button "Clear" [ref=e142] [cursor=pointer]
+                - button "⌫" [ref=e143] [cursor=pointer]
+                - button "a/b" [ref=e144] [cursor=pointer]
+                - button "√x" [ref=e145] [cursor=pointer]
+                - button "xⁿ" [ref=e146] [cursor=pointer]
+                - button "xᵢ" [ref=e147] [cursor=pointer]
+                - button "sin" [ref=e148] [cursor=pointer]
+                - button "cos" [ref=e149] [cursor=pointer]
+                - button "tan" [ref=e150] [cursor=pointer]
+                - button "asin" [ref=e151] [cursor=pointer]
+                - button "acos" [ref=e152] [cursor=pointer]
+                - button "atan" [ref=e153] [cursor=pointer]
+                - button "ln" [ref=e154] [cursor=pointer]
+                - button "log" [ref=e155] [cursor=pointer]
+                - button "exp" [ref=e156] [cursor=pointer]
+                - button "|x|" [ref=e157] [cursor=pointer]
+                - button "C(n,k)" [ref=e158] [cursor=pointer]
+                - button "n!" [ref=e159] [cursor=pointer]
+                - button "π" [ref=e160] [cursor=pointer]
+                - button "e" [ref=e161] [cursor=pointer]
+                - button "c" [ref=e162] [cursor=pointer]
+                - button "h" [ref=e163] [cursor=pointer]
+                - button "ℏ" [ref=e164] [cursor=pointer]
+                - button "R" [ref=e165] [cursor=pointer]
+                - button "NA" [ref=e166] [cursor=pointer]:
+                  - text: "N"
+                  - subscript [ref=e167]: A
+                - button "kB" [ref=e168] [cursor=pointer]:
+                  - text: k
+                  - subscript [ref=e169]: B
+                - button "me" [ref=e170] [cursor=pointer]:
+                  - text: m
+                  - subscript [ref=e171]: e
+                - button "eCharge" [ref=e172] [cursor=pointer]:
+                  - text: e
+                  - subscript [ref=e173]: Charge
+                - button "ε0" [ref=e174] [cursor=pointer]:
+                  - text: ε
+                  - subscript [ref=e175]: "0"
+                - button "σSB" [ref=e176] [cursor=pointer]:
+                  - text: σ
+                  - subscript [ref=e177]: SB
+                - button "(" [ref=e178] [cursor=pointer]
+                - button ")" [ref=e179] [cursor=pointer]
+                - button "7" [ref=e180] [cursor=pointer]
+                - button "8" [ref=e181] [cursor=pointer]
+                - button "9" [ref=e182] [cursor=pointer]
+                - button "÷" [ref=e183] [cursor=pointer]
+                - button "+" [ref=e184] [cursor=pointer]
+                - button "−" [ref=e185] [cursor=pointer]
+                - button "4" [ref=e186] [cursor=pointer]
+                - button "5" [ref=e187] [cursor=pointer]
+                - button "6" [ref=e188] [cursor=pointer]
+                - button "×" [ref=e189] [cursor=pointer]
+                - button "^" [ref=e190] [cursor=pointer]
+                - button "." [ref=e191] [cursor=pointer]
+                - button "1" [ref=e192] [cursor=pointer]
+                - button "2" [ref=e193] [cursor=pointer]
+                - button "3" [ref=e194] [cursor=pointer]
+                - button "=" [ref=e195] [cursor=pointer]
+                - button "0" [ref=e196] [cursor=pointer]
+                - button "eˣ" [ref=e197] [cursor=pointer]
+                - button "10ˣ" [ref=e198] [cursor=pointer]
+                - button "x²" [ref=e199] [cursor=pointer]
+                - button "x³" [ref=e200] [cursor=pointer]
+              - generic "Physical constants" [ref=e201]
+              - generic [ref=e202]:
+                - generic [ref=e203]:
+                  - text: Result
+                  - generic [ref=e204]: Error
+                  - generic [ref=e205]: Check expression syntax and constant aliases.
+                - generic [ref=e206]: Ready
+              - generic [ref=e207]: Expression could not be parsed. Check syntax and supported functions.
+            - text: Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu
+          - article [ref=e208]:
+            - generic [ref=e209]:
+              - generic [ref=e210]:
+                - heading "Recent Calculations" [level=3] [ref=e211]
+                - paragraph [ref=e212]: Local session history for quick re-use.
+              - button "Clear" [ref=e213] [cursor=pointer]
+            - generic [ref=e215]: No calculations yet. Evaluate an expression to seed the history panel.
+      - text: Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu
+      - generic [ref=e97]: Prototype for scientific exploration and educational calculation. Engineering decisions should still be validated against literature, calibrated models, and experimentally grounded inputs.
+  - status
+  - img [ref=e98]

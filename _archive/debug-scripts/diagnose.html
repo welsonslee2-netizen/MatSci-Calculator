@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>项目诊断工具</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f7fa;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { color: #1f5e87; margin-bottom: 1rem; }
+    .status-box {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .status-item {
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border-left: 4px solid #e0e0e0;
+      background: #fafafa;
+    }
+    .status-item.success { border-left-color: #6bcb77; background: #f0fff4; }
+    .status-item.error { border-left-color: #ff6b6b; background: #fff5f5; }
+    .status-item.warning { border-left-color: #ffa502; background: #fff9e6; }
+    .label { font-weight: 600; color: #333; }
+    .value { color: #666; font-family: monospace; margin-top: 0.25rem; }
+    button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(145deg, #1f5e87, #2b7691);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 0.5rem 0.5rem 0.5rem 0;
+    }
+    button:hover { transform: translateY(-2px); }
+    pre {
+      background: #2d3748;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 MatSci Calculator Lab - 项目诊断</h1>
+    
+    <div>
+      <button onclick="runDiagnostics()">▶ 运行完整诊断</button>
+      <button onclick="testPageSwitch()">🧪 测试页面切换</button>
+      <button onclick="openMainApp()">🌐 打开主应用</button>
+    </div>
+    
+    <div id="results"></div>
+  </div>
+
+  <script>
+    function addResult(category, status, message, detail = '') {
+      const resultsDiv = document.getElementById('results');
+      let categoryDiv = resultsDiv.querySelector(`[data-category="${category}"]`);
+      
+      if (!categoryDiv) {
+        categoryDiv = document.createElement('div');
+        categoryDiv.className = 'status-box';
+        categoryDiv.dataset.category = category;
+        categoryDiv.innerHTML = `<h2>${category}</h2>`;
+        resultsDiv.appendChild(categoryDiv);
+      }
+      
+      const item = document.createElement('div');
+      item.className = `status-item ${status}`;
+      item.innerHTML = `
+        <div class="label">${message}</div>
+        ${detail ? `<div class="value">${detail}</div>` : ''}
+      `;
+      categoryDiv.appendChild(item);
+    }
+    
+    async function runDiagnostics() {
+      document.getElementById('results').innerHTML = '<div class="status-box"><p>正在诊断...</p></div>';
+      
+      // 1. 检查当前URL协议
+      const protocol = window.location.protocol;
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      
+      if (protocol === 'file:') {
+        addResult('环境检查', 'error', '❌ 使用 file:// 协议', '这会导致功能受限！请使用本地服务器');
+      } else if (isLocalhost) {
+        addResult('环境检查', 'success', '✅ 使用本地服务器', `${window.location.href}`);
+      } else {
+        addResult('环境检查', 'warning', '⚠️  非标准环境', window.location.href);
+      }
+      
+      // 2. 检查文件加载
+      const filesToCheck = [
+        'styles.css',
+        'data/constants.js',
+        'data/elements.js',
+        'modules/utils.js',
+        'modules/models.js',
+        'app.js'
+      ];
+      
+      for (const file of filesToCheck) {
+        try {
+          const response = await fetch(file, { method: 'HEAD' });
+          if (response.ok) {
+            addResult('文件检查', 'success', `✅ ${file}`, `状态码: ${response.status}`);
+          } else {
+            addResult('文件检查', 'error', `❌ ${file}`, `状态码: ${response.status} - ${response.statusText}`);
+          }
+        } catch (error) {
+          addResult('文件检查', 'error', `❌ ${file}`, error.message);
+        }
+      }
+      
+      // 3. 检查CDN资源
+      const cdnChecks = {
+        'math.js': !!window.math,
+        'Plotly': !!window.Plotly,
+        'MathJax': !!window.MathJax,
+        'MSCLab': !!window.MSCLab
+      };
+      
+      for (const [name, loaded] of Object.entries(cdnChecks)) {
+        if (loaded) {
+          addResult('依赖库', 'success', `✅ ${name} 已加载`);
+        } else {
+          addResult('依赖库', 'error', `❌ ${name} 未加载`);
+        }
+      }
+      
+      // 4. 检查DOM元素
+      const pages = ['home', 'classic-calculator', 'scientific-calculator', 
+                     'function-analysis', 'constants', 'elements', 
+                     'strengthening', 'visual-lab'];
+      
+      let foundCount = 0;
+      pages.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          foundCount++;
+        } else {
+          addResult('页面元素', 'error', `❌ 缺少页面: ${id}`);
+        }
+      });
+      
+      if (foundCount === pages.length) {
+        addResult('页面元素', 'success', `✅ 所有 ${foundCount} 个页面元素存在`);
+      }
+      
+      // 5. 检查CSS类
+      const activeSections = document.querySelectorAll('.page-section.active');
+      addResult('CSS状态', 'info', `ℹ️  当前激活的页面数: ${activeSections.length}`);
+      
+      if (activeSections.length > 0) {
+        Array.from(activeSections).forEach(s => {
+          addResult('CSS状态', 'success', `✅ 激活的页面: ${s.id}`);
+        });
+      }
+      
+      // 6. 检查导航按钮
+      const navButtons = document.querySelectorAll('[data-page]');
+      addResult('导航系统', 'info', `ℹ️  找到 ${navButtons.length} 个导航按钮`);
+      
+      // 7. 检查Console错误
+      addResult('浏览器Console', 'info', 'ℹ️  请查看浏览器Console (F12) 中的错误信息');
+      
+      console.log('%c📊 诊断完成', 'color: #1f5e87; font-size: 16px; font-weight: bold;');
+      console.log('URL:', window.location.href);
+      console.log('Protocol:', protocol);
+      console.log('Files checked:', filesToCheck.length);
+      console.log('Pages found:', foundCount, '/', pages.length);
+    }
+    
+    function testPageSwitch() {
+      console.log('%c🧪 开始测试页面切换...', 'color: #1f5e87; font-weight: bold;');
+      
+      const pages = ['home', 'scientific-calculator', 'constants', 'elements'];
+      
+      pages.forEach((pageId, index) => {
+        setTimeout(() => {
+          console.log(`\n测试切换到: ${pageId}`);
+          
+          // 隐藏所有页面
+          document.querySelectorAll('.page-section').forEach(s => {
+            s.classList.remove('active');
+            console.log('  隐藏:', s.id);
+          });
+          
+          // 显示目标页面
+          const target = document.getElementById(pageId);
+          if (target) {
+            target.classList.add('active');
+            const display = getComputedStyle(target).display;
+            console.log('  显示:', target.id, '- display:', display);
+            
+            if (display === 'none') {
+              console.error('  ❌ CSS问题：display仍然是none！');
+              target.style.display = 'grid';
+              console.log('  🔧 已强制设置 display: grid');
+            }
+          } else {
+            console.error('  ❌ 页面不存在');
+          }
+        }, index * 1000);
+      });
+      
+      setTimeout(() => {
+        console.log('%c✅ 测试完成！请检查页面上是否显示了不同内容', 'color: #6bcb77; font-weight: bold;');
+      }, pages.length * 1000 + 500);
+    }
+    
+    function openMainApp() {
+      window.open('index.html', '_blank');
+    }
+    
+    // 自动运行诊断
+    window.addEventListener('load', () => {
+      setTimeout(runDiagnostics, 500);
+    });
+  </script>
+</body>
+</html>

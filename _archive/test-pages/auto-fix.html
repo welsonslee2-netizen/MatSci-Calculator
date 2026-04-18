@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>自动诊断和修复</title>
+  <style>
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .box {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 { color: #1f5e87; }
+    h2 { color: #1f5e87; font-size: 1.2em; }
+    .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+    .warning { background: #fff3cd; color: #856404; }
+    pre {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    button {
+      background: #1f5e87;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    button:hover { background: #174a6b; }
+    .step {
+      background: #e7f3ff;
+      padding: 15px;
+      margin: 10px 0;
+      border-left: 4px solid #1f5e87;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔧 MatSci Calculator Lab - 自动诊断和修复</h1>
+  
+  <div class="box">
+    <h2>步骤1：诊断问题</h2>
+    <button onclick="runDiagnosis()">开始诊断</button>
+    <div id="diagnosis-result"></div>
+  </div>
+  
+  <div class="box">
+    <h2>步骤2：执行修复</h2>
+    <button onclick="runFix()">执行修复</button>
+    <div id="fix-result"></div>
+  </div>
+  
+  <div class="box">
+    <h2>步骤3：验证修复</h2>
+    <button onclick="runVerification()">验证修复</button>
+    <div id="verification-result"></div>
+  </div>
+  
+  <div class="box">
+    <h2>📋 使用说明</h2>
+    <div class="step">
+      <strong>1. 打开主应用</strong><br>
+      在另一个标签页打开：<code>http://localhost:8080/index.html</code>
+    </div>
+    <div class="step">
+      <strong>2. 按顺序点击按钮</strong><br>
+      先点"开始诊断"，然后"执行修复"，最后"验证修复"
+    </div>
+    <div class="step">
+      <strong>3. 查看结果</strong><br>
+      根据显示的结果判断问题是否解决
+    </div>
+  </div>
+
+  <script>
+    // 存储主应用窗口的引用
+    let appWindow = null;
+    
+    function getAppWindow() {
+      if (!appWindow || appWindow.closed) {
+        // 尝试找到已打开的窗口
+        const windows = window.open('', '_self');
+        // 如果没有找到，打开新窗口
+        appWindow = window.open('http://localhost:8080/index.html', 'matSciApp');
+      }
+      return appWindow;
+    }
+    
+    function runDiagnosis() {
+      const resultDiv = document.getElementById('diagnosis-result');
+      resultDiv.innerHTML = '<div class="warning">正在诊断...</div>';
+      
+      const win = getAppWindow();
+      
+      if (!win) {
+        resultDiv.innerHTML = '<div class="error">❌ 无法连接到主应用</div>';
+        return;
+      }
+      
+      setTimeout(() => {
+        try {
+          const doc = win.document;
+          
+          // 检查页面元素
+          const pages = doc.querySelectorAll('.page-section');
+          const activePage = doc.querySelector('.page-section.active');
+          const mainContent = doc.querySelector('.main-content');
+          
+          let html = '<h3>诊断结果：</h3>';
+          
+          if (pages.length === 0) {
+            html += '<div class="error">❌ 未找到 .page-section 元素</div>';
+          } else {
+            html += `<div class="success">✅ 找到 ${pages.length} 个页面区块</div>`;
+          }
+          
+          if (activePage) {
+            const computed = win.getComputedStyle(activePage);
+            const rect = activePage.getBoundingClientRect();
+            const mainComputed = win.getComputedStyle(mainContent);
+            
+            html += '<h4>当前激活页面信息：</h4>';
+            html += '<pre>';
+            html += `页面ID: ${activePage.id}\n`;
+            html += `class: ${activePage.className}\n`;
+            html += `computed display: ${computed.display}\n`;
+            html += `computed position: ${computed.position}\n`;
+            html += `computed top: ${computed.top}\n`;
+            html += `computed height: ${computed.height}\n`;
+            html += `rect.top: ${rect.top}\n`;
+            html += `rect.height: ${rect.height}\n`;
+            html += `children count: ${activePage.children.length}\n`;
+            html += '\n父容器 (.main-content) 信息：\n';
+            html += `display: ${mainComputed.display}\n`;
+            html += `overflow: ${mainComputed.overflow}\n`;
+            html += `height: ${mainComputed.height}\n`;
+            html += '</pre>';
+            
+            // 分析问题
+            html += '<h4>问题分析：</h4>';
+            if (computed.display === 'none') {
+              html += '<div class="error">❌ 问题：页面 display 为 none</div>';
+            } else if (rect.top < 0 || rect.top > win.innerHeight) {
+              html += '<div class="error">❌ 问题：页面不在视口内 (top: ' + rect.top + ')</div>';
+            } else if (mainComputed.overflow === 'hidden') {
+              html += '<div class="warning">⚠️ 警告：父容器 overflow: hidden 可能裁剪内容</div>';
+            } else if (rect.height === 0) {
+              html += '<div class="error">❌ 问题：页面高度为 0</div>';
+            } else {
+              html += '<div class="success">✅ CSS 样式看起来正常</div>';
+            }
+          } else {
+            html += '<div class="error">❌ 未找到激活的页面</div>';
+          }
+          
+          resultDiv.innerHTML = html;
+        } catch (e) {
+          resultDiv.innerHTML = '<div class="error">❌ 诊断失败: ' + e.message + '</div>';
+          console.error('诊断错误:', e);
+        }
+      }, 1000);
+    }
+    
+    function runFix() {
+      const resultDiv = document.getElementById('fix-result');
+      resultDiv.innerHTML = '<div class="warning">正在修复...</div>';
+      
+      const win = getAppWindow();
+      
+      if (!win) {
+        resultDiv.innerHTML = '<div class="error">❌ 无法连接到主应用</div>';
+        return;
+      }
+      
+      setTimeout(() => {
+        try {
+          const doc = win.document;
+          
+          // 修复1: 修改 .main-content
+          const mainContent = doc.querySelector('.main-content');
+          if (mainContent) {
+            mainContent.style.overflow = 'auto';
+            mainContent.style.height = 'auto';
+            mainContent.style.minHeight = '100%';
+          }
+          
+          // 修复2: 修改所有 .page-section
+          doc.querySelectorAll('.page-section').forEach(page => {
+            page.style.position = 'relative';
+            page.style.top = '0';
+            page.style.left = '0';
+            page.style.right = 'auto';
+            page.style.bottom = 'auto';
+          });
+          
+          // 修复3: 注入CSS
+          const style = doc.createElement('style');
+          style.textContent = `
+            .main-content {
+              overflow: auto !important;
+              height: auto !important;
+            }
+            .page-section {
+              position: relative !important;
+              top: 0 !important;
+              left: 0 !important;
+            }
+            .page-section.active {
+              display: grid !important;
+            }
+          `;
+          doc.head.appendChild(style);
+          
+          resultDiv.innerHTML = `
+            <div class="success">✅ 修复完成！</div>
+            <div class="step">
+              <strong>已执行的修复：</strong><br>
+              1. 设置 .main-content overflow: auto<br>
+              2. 重置所有 .page-section 的定位属性<br>
+              3. 注入强制CSS规则
+            </div>
+          `;
+        } catch (e) {
+          resultDiv.innerHTML = '<div class="error">❌ 修复失败: ' + e.message + '</div>';
+          console.error('修复错误:', e);
+        }
+      }, 500);
+    }
+    
+    function runVerification() {
+      const resultDiv = document.getElementById('verification-result');
+      resultDiv.innerHTML = '<div class="warning">正在验证...</div>';
+      
+      const win = getAppWindow();
+      
+      if (!win) {
+        resultDiv.innerHTML = '<div class="error">❌ 无法连接到主应用</div>';
+        return;
+      }
+      
+      setTimeout(() => {
+        try {
+          const doc = win.document;
+          const activePage = doc.querySelector('.page-section.active');
+          const mainContent = doc.querySelector('.main-content');
+          
+          let html = '<h3>验证结果：</h3>';
+          
+          if (activePage) {
+            const computed = win.getComputedStyle(activePage);
+            const rect = activePage.getBoundingClientRect();
+            const mainComputed = win.getComputedStyle(mainContent);
+            
+            html += '<pre>';
+            html += `激活页面: ${activePage.id}\n`;
+            html += `display: ${computed.display}\n`;
+            html += `position: ${computed.position}\n`;
+            html += `top: ${computed.top}\n`;
+            html += `height: ${computed.height}\n`;
+            html += `rect.top: ${rect.top}\n`;
+            html += `rect.height: ${rect.height}\n`;
+            html += `父容器 overflow: ${mainComputed.overflow}\n`;
+            html += '</pre>';
+            
+            if (computed.display === 'grid' || computed.display === 'block') {
+              if (rect.height > 0 && rect.top >= 0) {
+                html += '<div class="success">✅ 页面应该可见了！</div>';
+              } else {
+                html += '<div class="warning">⚠️ 页面可能在视口外</div>';
+              }
+            } else {
+              html += '<div class="error">❌ 页面 display 不是 grid/block</div>';
+            }
+          } else {
+            html += '<div class="error">❌ 没有激活的页面</div>';
+          }
+          
+          html += '<div class="step">';
+          html += '<strong>现在请：</strong><br>';
+          html += '1. 切换到主应用窗口<br>';
+          html += '2. 点击导航按钮测试页面切换<br>';
+          html += '3. 看是否能看到内容';
+          html += '</div>';
+          
+          resultDiv.innerHTML = html;
+        } catch (e) {
+          resultDiv.innerHTML = '<div class="error">❌ 验证失败: ' + e.message + '</div>';
+          console.error('验证错误:', e);
+        }
+      }, 500);
+    }
+  </script>
+</body>
+</html>

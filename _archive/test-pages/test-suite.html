@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MatSci Calculator - Quick Test Suite</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f7fa;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      color: #1f5e87;
+      margin-bottom: 0.5rem;
+    }
+    
+    .subtitle {
+      color: #60758a;
+      margin-bottom: 2rem;
+    }
+    
+    .test-section {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .test-section h2 {
+      color: #173047;
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .status-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    
+    .status-pending {
+      background: #ffd93d;
+      color: #856404;
+    }
+    
+    .status-pass {
+      background: #6bcb77;
+      color: white;
+    }
+    
+    .status-fail {
+      background: #ff6b6b;
+      color: white;
+    }
+    
+    .test-item {
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border-left: 3px solid #e0e0e0;
+      background: #fafafa;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    
+    .test-item:hover {
+      background: #f0f0f0;
+    }
+    
+    .test-item.pass {
+      border-left-color: #6bcb77;
+      background: #f0fff4;
+    }
+    
+    .test-item.fail {
+      border-left-color: #ff6b6b;
+      background: #fff5f5;
+    }
+    
+    .test-name {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 0.25rem;
+    }
+    
+    .test-detail {
+      font-size: 0.9rem;
+      color: #666;
+      font-family: monospace;
+    }
+    
+    .test-result {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+    }
+    
+    .result-pass {
+      color: #2d7a3a;
+    }
+    
+    .result-fail {
+      color: #c53030;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.95rem;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(145deg, #1f5e87, #2b7691);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(31, 94, 135, 0.3);
+    }
+    
+    .btn-secondary {
+      background: white;
+      color: #1f5e87;
+      border: 2px solid #1f5e87;
+    }
+    
+    .btn-secondary:hover {
+      background: #f0f7ff;
+    }
+    
+    .summary {
+      background: linear-gradient(145deg, #1f5e87, #2b7691);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+    
+    .summary-item {
+      text-align: center;
+    }
+    
+    .summary-value {
+      font-size: 2rem;
+      font-weight: 700;
+      display: block;
+    }
+    
+    .summary-label {
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 1rem;
+      grid-column: 1 / -1;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: #6bcb77;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+    
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 MatSci Calculator Lab - 自动化测试套件</h1>
+    <p class="subtitle">快速检测核心功能是否正常运作</p>
+    
+    <div class="controls">
+      <button class="btn-primary" onclick="runAllTests()">▶ 运行全部测试</button>
+      <button class="btn-secondary" onclick="openMainApp()">🌐 打开主应用</button>
+      <button class="btn-secondary" onclick="clearResults()">🗑 清除结果</button>
+    </div>
+    
+    <div id="summary" class="summary" style="display: none;">
+      <div class="summary-item">
+        <span class="summary-value" id="total-tests">0</span>
+        <span class="summary-label">总测试数</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-value" id="passed-tests">0</span>
+        <span class="summary-label">通过</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-value" id="failed-tests">0</span>
+        <span class="summary-label">失败</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-value" id="pass-rate">0%</span>
+        <span class="summary-label">通过率</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+    </div>
+    
+    <div id="test-results"></div>
+  </div>
+
+  <script>
+    let testResults = [];
+    
+    function openMainApp() {
+      window.open('index.html', '_blank');
+    }
+    
+    function clearResults() {
+      document.getElementById('test-results').innerHTML = '';
+      document.getElementById('summary').style.display = 'none';
+      testResults = [];
+    }
+    
+    function addTestResult(section, name, passed, detail, expected, actual) {
+      const result = {
+        section,
+        name,
+        passed,
+        detail,
+        expected,
+        actual,
+        timestamp: new Date().toISOString()
+      };
+      testResults.push(result);
+      
+      renderTestResult(result);
+      updateSummary();
+    }
+    
+    function renderTestResult(result) {
+      const container = document.getElementById('test-results');
+      let sectionEl = container.querySelector(`[data-section="${result.section}"]`);
+      
+      if (!sectionEl) {
+        sectionEl = document.createElement('div');
+        sectionEl.className = 'test-section';
+        sectionEl.dataset.section = result.section;
+        sectionEl.innerHTML = `
+          <h2>
+            <span class="status-icon status-pending" id="icon-${result.section.replace(/\s+/g, '-')}">⏳</span>
+            ${result.section}
+          </h2>
+          <div class="test-list"></div>
+        `;
+        container.appendChild(sectionEl);
+      }
+      
+      const testList = sectionEl.querySelector('.test-list');
+      const testEl = document.createElement('div');
+      testEl.className = `test-item ${result.passed ? 'pass' : 'fail'}`;
+      
+      let resultHtml = '';
+      if (result.expected !== undefined) {
+        resultHtml = `
+          <div class="test-result">
+            <div class="${result.passed ? 'result-pass' : 'result-fail'}">
+              ${result.passed ? '✓' : '✗'} 
+              预期: ${result.expected} | 
+              实际: ${result.actual}
+            </div>
+          </div>
+        `;
+      }
+      
+      testEl.innerHTML = `
+        <div class="test-name">${result.name}</div>
+        ${result.detail ? `<div class="test-detail">${result.detail}</div>` : ''}
+        ${resultHtml}
+      `;
+      
+      testList.appendChild(testEl);
+    }
+    
+    function updateSummary() {
+      const total = testResults.length;
+      const passed = testResults.filter(r => r.passed).length;
+      const failed = total - passed;
+      const rate = total > 0 ? Math.round((passed / total) * 100) : 0;
+      
+      document.getElementById('total-tests').textContent = total;
+      document.getElementById('passed-tests').textContent = passed;
+      document.getElementById('failed-tests').textContent = failed;
+      document.getElementById('pass-rate').textContent = rate + '%';
+      document.getElementById('progress-fill').style.width = rate + '%';
+      document.getElementById('summary').style.display = 'grid';
+      
+      // Update section icons
+      const sections = {};
+      testResults.forEach(r => {
+        if (!sections[r.section]) {
+          sections[r.section] = { total: 0, passed: 0 };
+        }
+        sections[r.section].total++;
+        if (r.passed) sections[r.section].passed++;
+      });
+      
+      Object.keys(sections).forEach(section => {
+        const s = sections[section];
+        const iconId = `icon-${section.replace(/\s+/g, '-')}`;
+        const iconEl = document.getElementById(iconId);
+        if (iconEl) {
+          if (s.passed === s.total) {
+            iconEl.className = 'status-icon status-pass';
+            iconEl.textContent = '✓';
+          } else if (s.passed === 0) {
+            iconEl.className = 'status-icon status-fail';
+            iconEl.textContent = '✗';
+          } else {
+            iconEl.className = 'status-icon status-pending';
+            iconEl.textContent = '◐';
+          }
+        }
+      });
+    }
+    
+    async function runAllTests() {
+      clearResults();
+      
+      console.log('🚀 开始运行测试套件...');
+      
+      await testDataIntegrity();
+      await testMathFunctions();
+      await testUnitConversions();
+      await testStrengtheningModels();
+      await testUIComponents();
+      
+      console.log('✅ 测试完成！');
+    }
+    
+    // 测试1: 数据完整性
+    async function testDataIntegrity() {
+      const section = '数据完整性检查';
+      
+      try {
+        // 检查constants.js
+        if (window.MSCLab && window.MSCLab.constantsData) {
+          const count = window.MSCLab.constantsData.length;
+          addTestResult(section, '常数数据加载', true, `加载了 ${count} 个常数`, undefined, undefined);
+          
+          // 检查必需字段
+          const first = window.MSCLab.constantsData[0];
+          const hasRequiredFields = first.id && first.name && first.symbol && first.value !== undefined;
+          addTestResult(section, '常数数据结构', hasRequiredFields, '检查必需字段', 'id, name, symbol, value', hasRequiredFields ? '✓' : '✗');
+        } else {
+          addTestResult(section, '常数数据加载', false, 'MSCLab.constantsData 未定义', '存在', '未定义');
+        }
+        
+        // 检查elements.js
+        if (window.MSCLab && window.MSCLab.elementsData) {
+          const count = window.MSCLab.elementsData.length;
+          addTestResult(section, '元素数据加载', true, `加载了 ${count} 个元素`, undefined, undefined);
+          
+          const first = window.MSCLab.elementsData[0];
+          const hasRequiredFields = first.symbol && first.name && first.atomicNumber;
+          addTestResult(section, '元素数据结构', hasRequiredFields, '检查必需字段', 'symbol, name, atomicNumber', hasRequiredFields ? '✓' : '✗');
+        } else {
+          addTestResult(section, '元素数据加载', false, 'MSCLab.elementsData 未定义', '存在', '未定义');
+        }
+        
+        // 检查工具函数
+        if (window.MSCLab && window.MSCLab.Utils) {
+          addTestResult(section, '工具函数模块', true, 'Utils模块已加载', undefined, undefined);
+        } else {
+          addTestResult(section, '工具函数模块', false, 'Utils模块未加载', '存在', '未定义');
+        }
+        
+        // 检查计算模型
+        if (window.MSCLab && window.MSCLab.Models) {
+          addTestResult(section, '计算模型模块', true, 'Models模块已加载', undefined, undefined);
+        } else {
+          addTestResult(section, '计算模型模块', false, 'Models模块未加载', '存在', '未定义');
+        }
+        
+      } catch (error) {
+        addTestResult(section, '数据完整性检查', false, error.message, '无错误', error.message);
+      }
+    }
+    
+    // 测试2: 数学函数
+    async function testMathFunctions() {
+      const section = '数学函数验证';
+      
+      if (!window.MSCLab || !window.MSCLab.Models) {
+        addTestResult(section, '跳过测试', false, 'Models模块未加载', undefined, undefined);
+        return;
+      }
+      
+      const Models = window.MSCLab.Models;
+      
+      try {
+        // 测试表达式求值
+        const test1 = Models.evaluateExpression('2 + 3 * 4');
+        addTestResult(section, '基础运算: 2+3*4', test1 === 14, '混合运算优先级', '14', test1);
+        
+        const test2 = Models.evaluateExpression('sin(pi/2)');
+        addTestResult(section, '三角函数: sin(π/2)', Math.abs(test2 - 1) < 0.0001, '正弦函数', '≈1', test2.toFixed(6));
+        
+        const test3 = Models.evaluateExpression('sqrt(16)');
+        addTestResult(section, '平方根: √16', test3 === 4, '平方根计算', '4', test3);
+        
+        const test4 = Models.evaluateExpression('log10(1000)');
+        addTestResult(section, '对数: log₁₀(1000)', test4 === 3, '常用对数', '3', test4);
+        
+        const test5 = Models.evaluateExpression('e^2');
+        addTestResult(section, '指数: e²', Math.abs(test5 - Math.E**2) < 0.0001, '自然指数', '≈7.389', test5.toFixed(3));
+        
+        // 测试导数
+        const deriv = Models.numericalDerivative('x^2', 3, 1e-5);
+        addTestResult(section, '数值导数: d(x²)/dx @ x=3', Math.abs(deriv - 6) < 0.01, '导数应为2x=6', '≈6', deriv.toFixed(4));
+        
+        // 测试积分
+        const integral = Models.definiteIntegral('x^2', 0, 1, 100);
+        addTestResult(section, '定积分: ∫₀¹x²dx', Math.abs(integral - 1/3) < 0.001, '积分应为1/3', '≈0.333', integral.toFixed(4));
+        
+        // 测试求根
+        const root = Models.findRoot('x^2 - 4', 1, 3, 1e-6);
+        addTestResult(section, '方程求根: x²-4=0', Math.abs(root.root - 2) < 0.001, '根应为2', '≈2', root.root.toFixed(4));
+        
+      } catch (error) {
+        addTestResult(section, '数学函数测试', false, error.message, '无错误', error.message);
+      }
+    }
+    
+    // 测试3: 单位转换
+    async function testUnitConversions() {
+      const section = '单位转换系统';
+      
+      if (!window.MSCLab || !window.MSCLab.Models) {
+        addTestResult(section, '跳过测试', false, 'Models模块未加载', undefined, undefined);
+        return;
+      }
+      
+      try {
+        // Hall-Petch测试
+        const hp = Models.hallPetch({
+          sigma0: 180,
+          sigma0Unit: 'MPa',
+          ky: 0.7,
+          grainSize: 12,
+          grainUnit: 'um'
+        });
+        
+        addTestResult(section, 'Hall-Petch默认值计算', hp.incrementMPa > 0 && hp.totalYieldMPa > 180, 
+          '增量和总强度应为正值', '>0', `Δσ=${hp.incrementMPa.toFixed(2)} MPa`);
+        
+        // 测试单位转换: μm → m
+        const grainSizeM = 12e-6;
+        const expected = 0.7 / Math.sqrt(grainSizeM);
+        addTestResult(section, '晶粒尺寸单位转换', Math.abs(hp.incrementMPa - expected) < 0.01, 
+          '12 μm应转换为12e-6 m', expected.toFixed(2), hp.incrementMPa.toFixed(2));
+        
+        // Dislocation测试
+        const dis = Models.dislocation({
+          alpha: 0.24,
+          G: 79,
+          b: 0.248,
+          rho: 2.0e14
+        });
+        
+        addTestResult(section, '位错强化计算', dis.incrementMPa > 0, 
+          '位错强化应为正值', '>0', `${dis.incrementMPa.toFixed(2)} MPa`);
+        
+        // Cutting测试
+        const cut = Models.cutting({
+          radius: 12,
+          fraction: 0.08,
+          apb: 150,
+          G: 80,
+          b: 0.255,
+          k: 0.75
+        });
+        
+        addTestResult(section, '切割强化计算', cut.incrementMPa > 0, 
+          '切割强化应为正值', '>0', `${cut.incrementMPa.toFixed(2)} MPa`);
+        
+        // Orowan测试
+        const or = Models.orowan({
+          G: 80,
+          b: 0.255,
+          radius: 18,
+          spacing: 60,
+          nu: 0.30
+        });
+        
+        addTestResult(section, 'Orowan强化计算', or.incrementMPa > 0, 
+          'Orowan强化应为正值', '>0', `${or.incrementMPa.toFixed(2)} MPa`);
+        
+      } catch (error) {
+        addTestResult(section, '单位转换测试', false, error.message, '无错误', error.message);
+      }
+    }
+    
+    // 测试4: 强化模型边界条件
+    async function testStrengtheningModels() {
+      const section = '强化模型边界条件';
+      
+      if (!window.MSCLab || !window.MSCLab.Models) {
+        addTestResult(section, '跳过测试', false, 'Models模块未加载', undefined, undefined);
+        return;
+      }
+      
+      const Models = window.MSCLab.Models;
+      
+      try {
+        // 测试无效输入
+        let errorThrown = false;
+        try {
+          Models.hallPetch({
+            sigma0: -100,  // 负值
+            sigma0Unit: 'MPa',
+            ky: 0.7,
+            grainSize: 12,
+            grainUnit: 'um'
+          });
+        } catch (e) {
+          errorThrown = true;
+        }
+        addTestResult(section, 'Hall-Petch负值检测', errorThrown, 
+          '应拒绝负的应力值', '抛出错误', errorThrown ? '✓ 已捕获' : '✗ 未捕获');
+        
+        // 测试体积分数范围
+        errorThrown = false;
+        try {
+          Models.cutting({
+            radius: 12,
+            fraction: 1.5,  // >1
+            apb: 150,
+            G: 80,
+            b: 0.255,
+            k: 0.75
+          });
+        } catch (e) {
+          errorThrown = true;
+        }
+        addTestResult(section, 'Cutting体积分数检测', errorThrown, 
+          '应拒绝f≥1的体积分数', '抛出错误', errorThrown ? '✓ 已捕获' : '✗ 未捕获');
+        
+        // 测试泊松比范围
+        errorThrown = false;
+        try {
+          Models.orowan({
+            G: 80,
+            b: 0.255,
+            radius: 18,
+            spacing: 60,
+            nu: 0.6  // 超出合理范围
+          });
+        } catch (e) {
+          errorThrown = true;
+        }
+        addTestResult(section, 'Orowan泊松比检测', errorThrown, 
+          '应拒绝ν≥0.49的泊松比', '抛出错误', errorThrown ? '✓ 已捕获' : '✗ 未捕获');
+        
+      } catch (error) {
+        addTestResult(section, '边界条件测试', false, error.message, '无错误', error.message);
+      }
+    }
+    
+    // 测试5: UI组件（简单检查）
+    async function testUIComponents() {
+      const section = 'UI组件检查';
+      
+      try {
+        // 检查关键DOM元素是否存在
+        const elements = [
+          { selector: '#classic-calculator', name: '经典计算器页面' },
+          { selector: '#scientific-calculator', name: '科学计算器页面' },
+          { selector: '#function-analysis', name: '函数分析页面' },
+          { selector: '#constants', name: '常数库页面' },
+          { selector: '#elements', name: '元素库页面' },
+          { selector: '#strengthening', name: '材料强化页面' },
+          { selector: '#visual-lab', name: '可视化实验室页面' }
+        ];
+        
+        elements.forEach(el => {
+          const exists = document.querySelector(el.selector) !== null;
+          addTestResult(section, el.name, exists, '页面容器存在性检查', '存在', exists ? '✓' : '✗');
+        });
+        
+        // 检查导航按钮
+        const navButtons = document.querySelectorAll('.nav-link');
+        addTestResult(section, '侧边栏导航按钮', navButtons.length >= 7, 
+          '应有至少7个导航按钮', '≥7', navButtons.length.toString());
+        
+        // 检查移动端导航
+        const mobileNav = document.querySelector('.mobile-nav');
+        addTestResult(section, '移动端导航栏', mobileNav !== null, 
+          '移动导航应存在', '存在', mobileNav ? '✓' : '✗');
+        
+      } catch (error) {
+        addTestResult(section, 'UI组件检查', false, error.message, '无错误', error.message);
+      }
+    }
+    
+    // 页面加载完成后自动显示提示
+    window.addEventListener('load', () => {
+      console.log('%c🧪 测试套件已就绪', 'color: #1f5e87; font-size: 16px; font-weight: bold;');
+      console.log('点击 "运行全部测试" 按钮开始自动化测试');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+  "appId": "com.matsci.calculator",
+  "appName": "MatSci Calculator",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "https"
+  },
+  "ios": {
+    "contentInset": "automatic",
+    "allowsLinkPreview": false,
+    "scrollEnabled": true,
+    "initialOrientation": "portrait"
+  },
+  "plugins": {
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#F4F7FB"
+    },
+    "Keyboard": {
+      "resize": "none",
+      "resizeOnFullScreen": true
+    },
+    "SafeArea": {
+      "enabled": true
+    }
+  }
+}

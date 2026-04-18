@@ -1,0 +1,158 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: MS
+        - generic [ref=e6]:
+          - paragraph [ref=e7]: 科学原型
+          - heading "MatSci Calculator Lab" [level=1] [ref=e8]
+          - paragraph [ref=e9]: 在一个本地仪表板中完成材料计算、参考数据与强化分析。
+      - generic [ref=e10]:
+        - generic [ref=e11]: 语言
+        - group "语言" [ref=e216]:
+          - button "EN" [ref=e13] [cursor=pointer]
+          - button "中文" [active] [ref=e14] [cursor=pointer]
+      - generic [ref=e15]:
+        - paragraph [ref=e16]: 工作区
+        - navigation "主导航" [ref=e217]:
+          - button "主页" [ref=e218] [cursor=pointer]
+          - button "经典计算器" [ref=e219] [cursor=pointer]
+          - button "科学计算器" [ref=e220] [cursor=pointer]
+          - button "函数分析" [ref=e221] [cursor=pointer]
+          - button "常数库" [ref=e222] [cursor=pointer]
+          - button "元素库" [ref=e223] [cursor=pointer]
+          - button "强化模块" [ref=e224] [cursor=pointer]
+          - button "可视化实验室" [ref=e225] [cursor=pointer]
+      - generic [ref=e26]:
+        - generic [ref=e27]: 原型 v1
+        - paragraph [ref=e28]: 采用原生 HTML、CSS 和 JavaScript 构建，无需后端，便于本地轻量使用。
+    - main [ref=e29]:
+      - text: Toggle Virtual Keyboard Menu
+      - generic [ref=e100]:
+        - generic [ref=e101]:
+          - generic [ref=e102]:
+            - paragraph [ref=e103]: 模块 02
+            - heading "科学计算器" [level=2] [ref=e226]
+            - paragraph [ref=e105]: 支持表达式求值、科学计数法、常用物理常数以及实用的单变量数值工具。
+          - generic [ref=e106]: 三角函数默认使用弧度
+        - generic [ref=e107]:
+          - article [ref=e108]:
+            - tablist "calcTabsAria" [ref=e109]:
+              - button "表达式求值" [ref=e227] [cursor=pointer]
+              - button "导数 / 积分 / 求根" [ref=e228] [cursor=pointer]
+              - button "符号微积分" [ref=e229] [cursor=pointer]
+              - button "绘制 f(x)" [ref=e230] [cursor=pointer]
+              - button "Taylor 展开" [ref=e231] [cursor=pointer]
+            - generic [ref=e115]:
+              - generic [ref=e116]:
+                - heading "表达式控制台" [level=3] [ref=e232]
+                - generic [ref=e119]:
+                  - button "求值" [ref=e233] [cursor=pointer]
+                  - button "重置" [ref=e234] [cursor=pointer]
+              - generic [ref=e122]:
+                - generic [ref=e123]: 表达式
+                - generic [ref=e124]:
+                  - generic [ref=e126]:
+                    - textbox
+                    - generic [ref=e127]:
+                      - generic [ref=e236]:
+                        - text: (3.2e3 ⋅
+                        - generic [ref=e237]: sin
+                        - generic [ref=e238]: (π/4)
+                        - text: )/(R ⋅ 298)
+                      - generic: Toggle Virtual Keyboard Menu
+                    - generic [ref=e133]:
+                      - status
+                  - generic [ref=e134]:
+                    - button "📋 LaTeX" [ref=e135] [cursor=pointer]:
+                      - generic [ref=e136]: 📋 LaTeX
+                    - button "📄 MathML" [ref=e137] [cursor=pointer]:
+                      - generic [ref=e138]: 📄 MathML
+                    - button "📝 Text" [ref=e139] [cursor=pointer]:
+                      - generic [ref=e140]: 📝 Text
+              - generic "Scientific calculator keypad" [ref=e141]:
+                - button "Clear" [ref=e142] [cursor=pointer]
+                - button "⌫" [ref=e143] [cursor=pointer]
+                - button "a/b" [ref=e144] [cursor=pointer]
+                - button "√x" [ref=e145] [cursor=pointer]
+                - button "xⁿ" [ref=e146] [cursor=pointer]
+                - button "xᵢ" [ref=e147] [cursor=pointer]
+                - button "sin" [ref=e148] [cursor=pointer]
+                - button "cos" [ref=e149] [cursor=pointer]
+                - button "tan" [ref=e150] [cursor=pointer]
+                - button "asin" [ref=e151] [cursor=pointer]
+                - button "acos" [ref=e152] [cursor=pointer]
+                - button "atan" [ref=e153] [cursor=pointer]
+                - button "ln" [ref=e154] [cursor=pointer]
+                - button "log" [ref=e155] [cursor=pointer]
+                - button "exp" [ref=e156] [cursor=pointer]
+                - button "|x|" [ref=e157] [cursor=pointer]
+                - button "C(n,k)" [ref=e158] [cursor=pointer]
+                - button "n!" [ref=e159] [cursor=pointer]
+                - button "π" [ref=e160] [cursor=pointer]
+                - button "e" [ref=e161] [cursor=pointer]
+                - button "c" [ref=e162] [cursor=pointer]
+                - button "h" [ref=e163] [cursor=pointer]
+                - button "ℏ" [ref=e164] [cursor=pointer]
+                - button "R" [ref=e165] [cursor=pointer]
+                - button "NA" [ref=e166] [cursor=pointer]:
+                  - text: "N"
+                  - subscript [ref=e167]: A
+                - button "kB" [ref=e168] [cursor=pointer]:
+                  - text: k
+                  - subscript [ref=e169]: B
+                - button "me" [ref=e170] [cursor=pointer]:
+                  - text: m
+                  - subscript [ref=e171]: e
+                - button "eCharge" [ref=e172] [cursor=pointer]:
+                  - text: e
+                  - subscript [ref=e173]: Charge
+                - button "ε0" [ref=e174] [cursor=pointer]:
+                  - text: ε
+                  - subscript [ref=e175]: "0"
+                - button "σSB" [ref=e176] [cursor=pointer]:
+                  - text: σ
+                  - subscript [ref=e177]: SB
+                - button "(" [ref=e178] [cursor=pointer]
+                - button ")" [ref=e179] [cursor=pointer]
+                - button "7" [ref=e180] [cursor=pointer]
+                - button "8" [ref=e181] [cursor=pointer]
+                - button "9" [ref=e182] [cursor=pointer]
+                - button "÷" [ref=e183] [cursor=pointer]
+                - button "+" [ref=e184] [cursor=pointer]
+                - button "−" [ref=e185] [cursor=pointer]
+                - button "4" [ref=e186] [cursor=pointer]
+                - button "5" [ref=e187] [cursor=pointer]
+                - button "6" [ref=e188] [cursor=pointer]
+                - button "×" [ref=e189] [cursor=pointer]
+                - button "^" [ref=e190] [cursor=pointer]
+                - button "." [ref=e191] [cursor=pointer]
+                - button "1" [ref=e192] [cursor=pointer]
+                - button "2" [ref=e193] [cursor=pointer]
+                - button "3" [ref=e194] [cursor=pointer]
+                - button "=" [ref=e195] [cursor=pointer]
+                - button "0" [ref=e196] [cursor=pointer]
+                - button "eˣ" [ref=e197] [cursor=pointer]
+                - button "10ˣ" [ref=e198] [cursor=pointer]
+                - button "x²" [ref=e199] [cursor=pointer]
+                - button "x³" [ref=e200] [cursor=pointer]
+              - generic "Physical constants" [ref=e201]
+              - generic [ref=e202]:
+                - generic [ref=e203]:
+                  - text: 结果
+                  - generic [ref=e204]: 错误
+                  - generic [ref=e205]: 请检查表达式语法和常数别名。
+                - generic [ref=e206]: 就绪
+              - generic [ref=e207]: 表达式无法解析，请检查语法和可用函数。
+            - text: Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu
+          - article [ref=e208]:
+            - generic [ref=e209]:
+              - generic [ref=e210]:
+                - heading "最近计算" [level=3] [ref=e239]
+                - paragraph [ref=e212]: 本地会话历史，便于快速复用。
+              - button "清除" [ref=e240] [cursor=pointer]
+            - generic [ref=e241]: 还没有计算记录，请先求值一个表达式。
+      - text: Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu Toggle Virtual Keyboard Menu
+      - generic [ref=e97]: 该原型用于科学探索与教学计算。工程决策仍需结合文献、校准模型与实验输入进行验证。
+  - status
+  - img [ref=e98]

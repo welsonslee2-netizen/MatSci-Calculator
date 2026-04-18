@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOM状态诊断器</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: monospace;
+      background: #1a1a2e;
+      color: #eee;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    .container { max-width: 1000px; margin: 0 auto; }
+    h1 { color: #00d9ff; margin-bottom: 1rem; }
+    .section {
+      background: #16213e;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+    }
+    h2 { color: #00d9ff; margin-bottom: 1rem; border-bottom: 2px solid #0f3460; padding-bottom: 0.5rem; }
+    pre {
+      background: #0f3460;
+      padding: 1rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .success { color: #00ff88; }
+    .error { color: #ff6b6b; }
+    .warning { color: #ffd93d; }
+    button {
+      background: #00d9ff;
+      color: #1a1a2e;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 0.5rem;
+    }
+    button:hover { background: #00b8d4; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 DOM状态诊断器</h1>
+    <p>此工具直接检查DOM的实际状态，绕过所有CSS和JavaScript逻辑</p>
+    
+    <div>
+      <button onclick="diagnoseDOM()">🔍 诊断DOM状态</button>
+      <button onclick="forceShowAll()">🔧 强制显示所有页面</button>
+      <button onclick="testSwitch()">🔄 测试页面切换</button>
+      <button onclick="openMainApp()">🌐 打开主应用</button>
+    </div>
+    
+    <div id="output"></div>
+  </div>
+
+  <script>
+    const output = document.getElementById('output');
+    
+    function log(html) {
+      output.innerHTML += html + '\n';
+    }
+    
+    function clearLog() {
+      output.innerHTML = '';
+    }
+    
+    function diagnoseDOM() {
+      clearLog();
+      
+      log('<div class="section"><h2>📊 DOM状态诊断</h2>');
+      
+      // 1. 检查所有页面元素
+      log('<h3>页面元素检查</h3>');
+      const pages = ['home', 'classic-calculator', 'scientific-calculator', 
+                     'function-analysis', 'constants', 'elements', 
+                     'strengthening', 'visual-lab'];
+      
+      pages.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          const hasActiveClass = el.classList.contains('active');
+          const display = getComputedStyle(el).display;
+          const parent = el.parentElement;
+          const pageIdAttr = el.dataset.pageId;
+          
+          log(`<div style="margin: 0.5rem 0; padding: 0.5rem; background: #1a1a2e; border-radius: 4px;">
+            <strong>${id}</strong><br>
+            &nbsp;&nbsp;✅ 元素存在<br>
+            &nbsp;&nbsp;📋 data-page-id: <span class="${pageIdAttr ? 'success' : 'error'}">${pageIdAttr || '未设置'}</span><br>
+            &nbsp;&nbsp;🎯 classList: <span class="${hasActiveClass ? 'success' : 'warning'}">${el.className}</span><br>
+            &nbsp;&nbsp; computed display: <span class="${display === 'grid' || display === 'block' ? 'success' : 'error'}">${display}</span><br>
+            &nbsp;&nbsp;‍👩‍👧‍👦 parent: ${parent ? parent.tagName : 'null'}
+          </div>`);
+        } else {
+          log(`<div style="margin: 0.5rem 0; padding: 0.5rem; background: #1a1a2e; border-radius: 4px;">
+            <strong>${id}</strong><br>
+            &nbsp;&nbsp;❌ 元素不存在
+          </div>`);
+        }
+      });
+      
+      // 2. 检查CSS规则
+      log('<h3>CSS规则检查</h3>');
+      const pageSections = document.querySelectorAll('.page-section');
+      log(`<div>找到 .page-section 元素: ${pageSections.length} 个</div>`);
+      
+      const activeSections = document.querySelectorAll('.page-section.active');
+      log(`<div>找到 .page-section.active 元素: ${activeSections.length} 个</div>`);
+      
+      if (pageSections.length > 0) {
+        const firstSection = pageSections[0];
+        const computedStyle = getComputedStyle(firstSection);
+        log(`<div>第一个 .page-section 的 computed display: ${computedStyle.display}</div>`);
+      }
+      
+      // 3. 检查JavaScript对象
+      log('<h3>JavaScript对象检查</h3>');
+      log(`<div>window.MSCLab: ${window.MSCLab ? '✅' : '❌'}</div>`);
+      log(`<div>window.math: ${window.math ? '✅' : '❌'}</div>`);
+      log(`<div>window.Plotly: ${window.Plotly ? '✅' : '❌'}</div>`);
+      
+      // 检查app.js中的函数（如果在主应用中运行）
+      if (window.MSCLab) {
+        log(`<div>MSCLab.Utils: ${window.MSCLab.Utils ? '✅' : '❌'}</div>`);
+        log(`<div>MSCLab.Models: ${window.MSCLab.Models ? '✅' : '❌'}</div>`);
+      }
+      
+      // 4. 检查事件监听器
+      log('<h3>事件监听器检查</h3>');
+      const navButtons = document.querySelectorAll('[data-page]');
+      log(`<div>找到导航按钮: ${navButtons.length} 个</div>`);
+      
+      if (navButtons.length > 0) {
+        const firstBtn = navButtons[0];
+        log(`<div>第一个按钮: ${firstBtn.dataset.page}</div>`);
+        log(`<div>按钮是否有点击监听器: 需要手动检查</div>`);
+      }
+      
+      log('</div>');
+      
+      console.log('%c✅ DOM诊断完成', 'color: #00d9ff; font-size: 16px; font-weight: bold;');
+    }
+    
+    function forceShowAll() {
+      clearLog();
+      log('<div class="section"><h2>🔧 强制显示所有页面</h2>');
+      
+      const pages = ['home', 'classic-calculator', 'scientific-calculator', 
+                     'function-analysis', 'constants', 'elements', 
+                     'strengthening', 'visual-lab'];
+      
+      pages.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.style.display = 'grid';
+          el.classList.add('active');
+          log(`<div class="success">✅ ${id} - 已强制显示</div>`);
+        } else {
+          log(`<div class="error">❌ ${id} - 元素不存在</div>`);
+        }
+      });
+      
+      log('<br><div class="warning">⚠️  所有页面现在都应该可见了（垂直排列）<br>如果看不到，说明CSS或其他问题阻止了显示</div>');
+      log('</div>');
+    }
+    
+    function testSwitch() {
+      clearLog();
+      log('<div class="section"><h2>🔄 页面切换测试</h2>');
+      
+      const pages = ['home', 'scientific-calculator', 'constants', 'elements'];
+      let currentIndex = 0;
+      
+      function switchToNext() {
+        if (currentIndex >= pages.length) {
+          log('<br><div class="success">✅ 测试完成！</div>');
+          log('</div>');
+          return;
+        }
+        
+        const pageId = pages[currentIndex];
+        log(`<div style="margin: 1rem 0; padding: 1rem; background: #1a1a2e; border-radius: 4px;">`);
+        log(`<strong>步骤 ${currentIndex + 1}: 切换到 ${pageId}</strong><br>`);
+        
+        // 隐藏所有页面
+        document.querySelectorAll('.page-section').forEach(s => {
+          s.classList.remove('active');
+          s.style.display = ''; // 清除内联样式
+        });
+        
+        // 显示目标页面
+        const target = document.getElementById(pageId);
+        if (target) {
+          target.classList.add('active');
+          const display = getComputedStyle(target).display;
+          
+          log(`&nbsp;&nbsp;添加 .active 类: ✅<br>`);
+          log(`&nbsp;&nbsp;computed display: ${display}<br>`);
+          
+          if (display === 'none' || display === '') {
+            log(`&nbsp;&nbsp;<span class="error">❌ 警告: display不是grid，强制设置</span><br>`);
+            target.style.display = 'grid';
+            const newDisplay = getComputedStyle(target).display;
+            log(`&nbsp;&nbsp;强制后 display: ${newDisplay}<br>`);
+          } else {
+            log(`&nbsp;&nbsp;<span class="success">✅ 页面应该可见了</span><br>`);
+          }
+        } else {
+          log(`&nbsp;&nbsp;<span class="error">❌ 页面元素不存在</span><br>`);
+        }
+        
+        log(`</div>`);
+        
+        currentIndex++;
+        setTimeout(switchToNext, 2000);
+      }
+      
+      switchToNext();
+    }
+    
+    function openMainApp() {
+      window.open('index.html', '_blank');
+    }
+    
+    // 自动诊断
+    window.addEventListener('load', () => {
+      setTimeout(diagnoseDOM, 500);
+    });
+  </script>
+</body>
+</html>

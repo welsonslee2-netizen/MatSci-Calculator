@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>简单诊断 - MatSci Calculator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 3rem;
+      max-width: 800px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #667eea;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .test-item {
+      padding: 1rem;
+      margin: 0.5rem 0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .test-item.success { background: #f0fff4; border-left: 4px solid #6bcb77; }
+    .test-item.error { background: #fff5f5; border-left: 4px solid #ff6b6b; }
+    .icon { font-size: 1.5rem; }
+    .label { flex: 1; font-weight: 600; }
+    .detail { color: #666; font-size: 0.9rem; }
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      margin: 0.5rem;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); }
+    .summary {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .summary.success { background: #f0fff4; color: #2d7a3a; }
+    .summary.error { background: #fff5f5; color: #c53030; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 MatSci Calculator Lab - 快速诊断</h1>
+    <div id="results"></div>
+    <div id="summary"></div>
+    <div style="text-align: center; margin-top: 2rem;">
+      <a href="index.html" class="btn">🚀 打开主应用</a>
+      <button class="btn" onclick="location.reload()">🔄 重新诊断</button>
+    </div>
+  </div>
+
+  <script>
+    let passCount = 0;
+    let failCount = 0;
+    
+    function addTest(label, passed, detail = '') {
+      const resultsDiv = document.getElementById('results');
+      const item = document.createElement('div');
+      item.className = `test-item ${passed ? 'success' : 'error'}`;
+      item.innerHTML = `
+        <div class="icon">${passed ? '✅' : '❌'}</div>
+        <div class="label">${label}</div>
+        ${detail ? `<div class="detail">${detail}</div>` : ''}
+      `;
+      resultsDiv.appendChild(item);
+      
+      if (passed) passCount++;
+      else failCount++;
+    }
+    
+    function runTests() {
+      // 1. 检查URL协议
+      const protocol = window.location.protocol;
+      const isLocalhost = window.location.hostname === 'localhost' || 
+                         window.location.hostname === '127.0.0.1';
+      
+      if (protocol === 'file:') {
+        addTest('运行环境', false, 'file:// 协议 - 请使用本地服务器');
+      } else if (isLocalhost) {
+        addTest('运行环境', true, `${window.location.href}`);
+      } else {
+        addTest('运行环境', false, `非标准环境: ${window.location.href}`);
+      }
+      
+      // 2. 检查页面是否存在
+      const pages = ['home', 'classic-calculator', 'scientific-calculator', 
+                     'function-analysis', 'constants', 'elements', 
+                     'strengthening', 'visual-lab'];
+      
+      const foundPages = [];
+      pages.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) foundPages.push(id);
+      });
+      
+      addTest('页面元素', foundPages.length === pages.length, 
+              `找到 ${foundPages.length}/${pages.length} 个页面`);
+      
+      // 3. 检查依赖库
+      const libs = {
+        'math.js': !!window.math,
+        'Plotly': !!window.Plotly,
+        'MathJax': !!window.MathJax,
+        'MSCLab': !!window.MSCLab,
+        'Utils': typeof Utils !== 'undefined',
+        'Models': typeof Models !== 'undefined'
+      };
+      
+      for (const [name, loaded] of Object.entries(libs)) {
+        addTest(`依赖库: ${name}`, loaded, loaded ? '已加载' : '未加载');
+      }
+      
+      // 4. 检查CSS
+      const activeSections = document.querySelectorAll('.page-section.active');
+      addTest('CSS状态', activeSections.length > 0, 
+              `${activeSections.length} 个页面处于激活状态`);
+      
+      // 5. 检查数据
+      if (window.MSCLab) {
+        addTest('常数数据', !!window.MSCLab.constantsData, 
+                window.MSCLab.constantsData ? `${window.MSCLab.constantsData.length} 个常数` : '无数据');
+        addTest('元素数据', !!window.MSCLab.elementsData, 
+                window.MSCLab.elementsData ? `${window.MSCLab.elementsData.length} 个元素` : '无数据');
+      }
+      
+      // 总结
+      const summaryDiv = document.getElementById('summary');
+      const total = passCount + failCount;
+      const rate = Math.round((passCount / total) * 100);
+      
+      if (failCount === 0) {
+        summaryDiv.className = 'summary success';
+        summaryDiv.innerHTML = `🎉 所有测试通过！(${passCount}/${total})<br>系统运行正常，可以开始使用！`;
+      } else {
+        summaryDiv.className = 'summary error';
+        summaryDiv.innerHTML = `⚠️ 部分测试失败 (${passCount}/${total} 通过)<br>通过率: ${rate}%<br><br>请点击"打开主应用"并检查Console`;
+      }
+      
+      console.log('%c📊 诊断完成', 'color: #667eea; font-size: 16px; font-weight: bold;');
+      console.log(`通过: ${passCount}, 失败: ${failCount}, 通过率: ${rate}%`);
+    }
+    
+    // 自动运行
+    window.addEventListener('load', () => {
+      setTimeout(runTests, 1000);
+    });
+  </script>
+</body>
+</html>
