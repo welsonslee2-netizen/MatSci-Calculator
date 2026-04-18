@@ -1,7 +1,7 @@
 {
   "name": "matsci-calculator-lab",
   "version": "1.0.0",
-  "description": "一款面向材料科学领域的科学计算器，集成公式编辑、函数分析、常数/元素数据库、材料强化模型计算与可视化。",
+  "description": "????????????????,??????????????/???????????????????",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,8 +15,9 @@
     "cap:open:ios": "cap open ios"
   },
   "dependencies": {
-    "@capacitor/cli": "^7.6.2",
+    "@capacitor/cli": "^8.3.1",
     "@capacitor/core": "^8.3.1",
+    "@capacitor/ios": "^8.3.1",
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "@fontsource/ibm-plex-sans": "^5.2.8",
     "@fontsource/stix-two-math": "^4.5.2",

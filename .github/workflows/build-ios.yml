@@ -8,7 +8,9 @@ on:
 jobs:
   build-ios:
     runs-on: macos-14
+
     steps:
+      # ?? 1. ???? ??
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -18,47 +20,53 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+      # ?? 2. ???? ??
+      - name: Install npm dependencies
+        run: npm install
 
-      - name: Install Capacitor iOS platform (match core version)
-        run: npm install @capacitor/ios@8 --save-dev
+      # ?? 3. ?? Capacitor ????? ??
+      # ??:CLI ? Core ?????????
+      # ?? CLI v7 + Core v8 ?? --packagemanager SPM ???
+      - name: Verify Capacitor versions
+        run: |
+          echo "=== Installed Capacitor packages ==="
+          npm ls @capacitor/cli @capacitor/core @capacitor/ios 2>&1 || true
+          CLI_VER=$(npx cap --version)
+          echo "CLI version: $CLI_VER"
+          # Extract major version
+          CLI_MAJOR=$(echo "$CLI_VER" | cut -d. -f1)
+          if [ "$CLI_MAJOR" != "8" ]; then
+            echo "? FATAL: Capacitor CLI must be v8, got v$CLI_VER"
+            echo "This means package.json has wrong @capacitor/cli version"
+            exit 1
+          fi
+          echo "? CLI v8 confirmed"
 
+      # ?? 4. ???? ??
       - name: Build web assets
         run: npm run build
 
+      # ?? 5. ?? iOS ?? (SPM ??) ??
       - name: Add iOS platform with SPM
         run: npx cap add ios --packagemanager SPM
 
-      - name: Generate iOS icons and splash (no white border)
+      # ?? 6. ???? (????) ??
+      - name: Setup app icon
         run: |
-          # Install icon generation tool
-          npm install @capacitor/assets --save-dev
-
-          # Ensure icon source is RGBA PNG 1024x1024 (avoid palette mode issues)
+          # Convert icon to proper RGBA PNG and place directly into AppIcon.appiconset
+          # This bypasses @capacitor/assets entirely to avoid white-border issues
           python3 -c "
           from PIL import Image
           img = Image.open('resources/icon.png').convert('RGBA')
-          img.save('assets/icon-only.png', 'PNG')
-          print(f'icon-only.png: {img.size} {img.mode}')
-          "
-
-          # Generate with background color matching app theme (#F4F7FB)
-          # This prevents white borders on adaptive icons
-          npx capacitor-assets generate --ios \
-            --icon-background-color '#F4F7FB' \
-            --icon-background-color-dark '#1C1C1E' || true
-
-          # Fallback: if generate failed, manually place icon into AppIcon
-          if [ ! -d "ios/App/App/Assets.xcassets/AppIcon.appiconset" ]; then
-            echo "⚠️ capacitor-assets failed, setting up AppIcon manually"
-            mkdir -p ios/App/App/Assets.xcassets/AppIcon.appiconset
-            python3 -c "
-          from PIL import Image
-          img = Image.open('resources/icon.png').convert('RGBA').resize((1024,1024), Image.LANCZOS)
+          if img.size != (1024, 1024):
+              print(f'Resizing icon from {img.size} to 1024x1024')
+              img = img.resize((1024, 1024), Image.LANCZOS)
           img.save('ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon.png', 'PNG')
+          print(f'Icon saved: {img.size} {img.mode}')
           "
-            cat > ios/App/App/Assets.xcassets/AppIcon.appiconset/Contents.json << 'JSON'
+
+          # Ensure Contents.json exists with correct format
+          cat > ios/App/App/Assets.xcassets/AppIcon.appiconset/Contents.json << 'JSON'
           {
             "images": [
               {
@@ -74,40 +82,53 @@ jobs:
             }
           }
           JSON
-          fi
 
-          # Verify icons exist
-          echo "=== AppIcon contents ==="
-          ls -la ios/App/App/Assets.xcassets/AppIcon.appiconset/ || echo "AppIcon dir not found!"
+          echo "=== Verify AppIcon ==="
+          ls -la ios/App/App/Assets.xcassets/AppIcon.appiconset/
 
-      - name: Sync Capacitor (auto-detect SPM)
+      # ?? 7. ?? Capacitor ??
+      # cap sync (?? platform ??) ????? SPM
+      - name: Sync Capacitor
         run: npx cap sync
 
-      - name: Verify project structure
+      # ?? 8. ???? (?????) ??
+      - name: Debug project structure
+        if: always()
         run: |
-          echo "=== iOS project structure ==="
-          ls ios/App/
-          echo "=== SPM directory ==="
-          ls ios/App/CapApp-SPM/ 2>/dev/null || echo "No CapApp-SPM dir"
-          echo "=== Podfile existence ==="
-          ls ios/App/Podfile 2>/dev/null || echo "No Podfile (good - using SPM)"
+          echo "=== iOS directory structure ==="
+          find ios/App -maxdepth 2 -type f -o -type d | head -50
           echo "=== Project files ==="
-          ls ios/App/*.xcodeproj ios/App/*.xcworkspace 2>/dev/null || echo "Checking deeper..."
-          find ios/App -maxdepth 1 -name "*.xcodeproj" -o -name "*.xcworkspace" 2>/dev/null
+          find ios/App -maxdepth 1 \( -name "*.xcodeproj" -o -name "*.xcworkspace" \)
+          echo "=== Podfile? ==="
+          ls -la ios/App/Podfile 2>/dev/null || echo "No Podfile (correct for SPM)"
+          echo "=== CapApp-SPM? ==="
+          ls -la ios/App/CapApp-SPM/ 2>/dev/null || echo "No CapApp-SPM dir"
+          echo "=== AppIcon? ==="
+          ls -la ios/App/App/Assets.xcassets/AppIcon.appiconset/ 2>/dev/null || echo "No AppIcon"
 
+      # ?? 9. ?? .app ??
       - name: Build unsigned .app
         run: |
           cd ios/App
-          # Determine project file type (SPM uses .xcodeproj, CocoaPods uses .xcworkspace)
+
+          # Determine project file: SPM uses .xcodeproj, CocoaPods uses .xcworkspace
           if [ -f "App.xcworkspace" ]; then
-            PROJECT_CMD="-workspace App.xcworkspace"
-            echo "Using workspace (CocoaPods)"
+            BUILD_CMD="-workspace App.xcworkspace"
+            echo "Using .xcworkspace (CocoaPods mode)"
+          elif [ -f "App.xcodeproj" ]; then
+            BUILD_CMD="-project App.xcodeproj"
+            echo "Using .xcodeproj (SPM mode)"
           else
-            PROJECT_CMD="-project App.xcodeproj"
-            echo "Using project (SPM)"
+            echo "? No Xcode project file found!"
+            ls -la
+            exit 1
           fi
 
-          xcodebuild $PROJECT_CMD \
+          # List available schemes for debugging
+          echo "=== Available schemes ==="
+          xcodebuild $BUILD_CMD -list 2>&1 || true
+
+          xcodebuild $BUILD_CMD \
             -scheme App \
             -configuration Release \
             -sdk iphoneos \
@@ -121,23 +142,36 @@ jobs:
             VALID_ARCHS="arm64" \
             2>&1 | tee build.log
 
+      # ?? 10. ?? IPA ??
       - name: Package into .ipa
         run: |
+          APP_DIR="ios/App/build/Build/Products/Release-iphoneos/App.app"
+          if [ ! -d "$APP_DIR" ]; then
+            echo "? App.app not found at $APP_DIR"
+            echo "=== Available products ==="
+            find ios/App/build -name "*.app" -type d 2>/dev/null || true
+            exit 1
+          fi
           cd ios/App/build/Build/Products/Release-iphoneos
           mkdir -p Payload
           cp -r App.app Payload/
           zip -r MatSci-Calculator.ipa Payload/
           rm -rf Payload
+          echo "? IPA created successfully"
+          ls -lh MatSci-Calculator.ipa
 
-      - name: Upload build log on failure
+      # ?? 11. ????????? ??
+      - name: Upload debug info on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: build-log
+          name: debug-info
           path: |
             ios/App/build.log
-            ios/App/**/*.xcconfig
+            ios/**/*.xcconfig
+            ios/CapApp-SPM/Package.swift
 
+      # ?? 12. ?? IPA ??
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
