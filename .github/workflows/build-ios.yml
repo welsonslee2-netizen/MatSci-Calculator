@@ -68,8 +68,22 @@ jobs:
             BUILD_CMD="-project App.xcodeproj"
           fi
 
+          # List available schemes
+          echo "=== Available schemes ==="
+          SCHEMES=$(xcodebuild $BUILD_CMD -list 2>&1)
+          echo "$SCHEMES"
+
+          # Detect scheme name (could be "App" or "MatSci Calculator")
+          SCHEME="App"
+          if echo "$SCHEMES" | grep -q "MatSci Calculator"; then
+            SCHEME="MatSci Calculator"
+            echo "Using scheme: $SCHEME"
+          else
+            echo "Using default scheme: $SCHEME"
+          fi
+
           xcodebuild $BUILD_CMD \
-            -scheme App \
+            -scheme "$SCHEME" \
             -configuration Release \
             -sdk iphoneos \
             -derivedDataPath build \
@@ -84,11 +98,44 @@ jobs:
 
       - name: Package into .ipa
         run: |
-          cd ios/App/build/Build/Products/Release-iphoneos
+          PRODUCTS_DIR="ios/App/build/Build/Products/Release-iphoneos"
+
+          if [ ! -d "$PRODUCTS_DIR" ]; then
+            echo "❌ Products directory not found: $PRODUCTS_DIR"
+            echo "=== Searching for .app bundles ==="
+            find ios/App/build -name "*.app" -type d 2>/dev/null || echo "No .app found anywhere"
+            exit 1
+          fi
+
+          echo "=== Contents of products dir ==="
+          ls -la "$PRODUCTS_DIR"
+
+          # Find the .app bundle (could be named App.app, MatSci Calculator.app, etc.)
+          APP_BUNDLE=$(find "$PRODUCTS_DIR" -maxdepth 1 -name "*.app" -type d | head -1)
+
+          if [ -z "$APP_BUNDLE" ]; then
+            echo "❌ No .app bundle found in $PRODUCTS_DIR"
+            exit 1
+          fi
+
+          echo "Found app bundle: $APP_BUNDLE"
+
+          # Verify Info.plist exists
+          if [ ! -f "$APP_BUNDLE/Info.plist" ]; then
+            echo "❌ Info.plist missing in $APP_BUNDLE"
+            ls -la "$APP_BUNDLE/"
+            exit 1
+          fi
+
+          echo "✅ Info.plist found"
+          cd "$PRODUCTS_DIR"
           mkdir -p Payload
-          cp -r App.app Payload/
+          cp -r "$APP_BUNDLE" Payload/
           zip -r MatSci-Calculator.ipa Payload/
           rm -rf Payload
+
+          echo "=== Verify IPA structure ==="
+          unzip -l MatSci-Calculator.ipa | head -20
 
       - name: Upload build log on failure
         if: failure()
