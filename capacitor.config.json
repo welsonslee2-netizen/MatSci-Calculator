@@ -1,5 +1,5 @@
 {
-  "appId": "com.matsci.calculator",
+  "appId": "com.welsonslee.matsci.calculator",
   "appName": "MatSci Calculator",
   "webDir": "dist",
   "webResourcesDir": "resources",
