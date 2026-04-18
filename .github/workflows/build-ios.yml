@@ -21,17 +21,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install @capacitor/ios and @nicepkg/capacitor-assets
-        run: npm install @capacitor/ios @nicepkg/capacitor-assets --save-dev
+      - name: Install Capacitor iOS platform
+        run: npm install @capacitor/ios --save-dev
+
+      - name: Install @capacitor/assets for icon generation
+        run: npm install @capacitor/assets --save-dev
 
       - name: Build web assets
         run: npm run build
 
-      - name: Generate iOS icons from source image
-        run: npx capacitor-assets generate --icon-background-type solid --icon-background-color "#1A73E8" --ios
-
       - name: Add iOS platform
         run: npx cap add ios
+
+      - name: Generate iOS icons from source image
+        run: npx capacitor-assets generate --ios
 
       - name: Sync Capacitor
         run: npx cap sync ios
