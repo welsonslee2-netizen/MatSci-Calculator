@@ -30,17 +30,10 @@ jobs:
 
       - name: Setup app icon (no white border)
         run: |
-          # Write icon directly into AppIcon.appiconset
-          # This avoids @capacitor/assets white-border issues entirely
-          python3 -c "
-          from PIL import Image
-          img = Image.open('resources/icon.png').convert('RGBA')
-          if img.size != (1024, 1024):
-              print(f'Resizing icon from {img.size} to 1024x1024')
-              img = img.resize((1024, 1024), Image.LANCZOS)
-          img.save('ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon.png', 'PNG')
-          print(f'Icon saved: {img.size} {img.mode}')
-          "
+          # Use macOS built-in sips to ensure icon is 1024x1024 PNG
+          # Then copy directly into AppIcon.appiconset (avoids @capacitor/assets white border)
+          mkdir -p ios/App/App/Assets.xcassets/AppIcon.appiconset
+          sips -z 1024 1024 resources/icon.png --out ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon.png
 
           cat > ios/App/App/Assets.xcassets/AppIcon.appiconset/Contents.json << 'JSON'
           {
@@ -58,6 +51,8 @@ jobs:
             }
           }
           JSON
+          echo "Icon ready:"
+          ls -la ios/App/App/Assets.xcassets/AppIcon.appiconset/
 
       - name: Sync Capacitor
         run: npx cap sync
