@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-latest
+    runs-on: macos-14
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,51 +30,31 @@ jobs:
       - name: Build web assets
         run: npm run build
 
-      - name: Add iOS platform
-        run: npx cap add ios
+      - name: Add iOS platform with SPM
+        run: npx cap add ios --packagemanager SPM
 
-      - name: Rewrite Podfile with deployment target 15.0
-        run: |
-          cd ios/App
-          echo "=== Original Podfile ==="
-          cat Podfile
-
-          # Completely replace Podfile to guarantee correct platform
-          ruby -e '
-            content = File.read("Podfile")
-            # Replace any platform line with ios 15.0
-            content.sub!(/^platform\s*:ios\s*,\s*["'\'']?[\d.]+["'\'']?/, "platform :ios, \"15.0\"")
-            # Ensure assertDeploymentTarget is called in post_install
-            unless content.include?("assertDeploymentTarget")
-              content += %Q[
-          post_install do |installer|
-            assertDeploymentTarget(installer)
-          end
-          ]
-            end
-            File.write("Podfile", content)
-          '
-
-          echo "=== Fixed Podfile ==="
-          cat Podfile
-
-      - name: Generate iOS icons from source image
+      - name: Generate iOS icons
         run: npx capacitor-assets generate --ios
 
-      - name: Install CocoaPods dependencies
-        run: cd ios/App && pod install
+      - name: Sync Capacitor
+        run: npx cap sync ios
 
       - name: Build unsigned .app
         run: |
           cd ios/App
-          xcodebuild -workspace App.xcworkspace \
+          xcodebuild -project App.xcodeproj \
             -scheme App \
             -configuration Release \
             -sdk iphoneos \
             -derivedDataPath build \
-            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" \
+            IPHONEOS_DEPLOYMENT_TARGET="15.0" \
+            ARCHS="arm64" \
+            VALID_ARCHS="arm64" \
+            2>&1 | tee build.log
 
       - name: Package into .ipa
         run: |
@@ -83,6 +63,13 @@ jobs:
           cp -r App.app Payload/
           zip -r MatSci-Calculator.ipa Payload/
           rm -rf Payload
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: ios/App/build.log
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
