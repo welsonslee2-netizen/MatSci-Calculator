@@ -28,14 +28,17 @@ jobs:
       - name: Add iOS platform with SPM
         run: npx cap add ios --packagemanager SPM
 
-      - name: Setup app icon (no white border)
-        run: |
-          # Use macOS built-in sips to ensure icon is 1024x1024 PNG
-          # Then copy directly into AppIcon.appiconset (avoids @capacitor/assets white border)
-          mkdir -p ios/App/App/Assets.xcassets/AppIcon.appiconset
-          sips -z 1024 1024 resources/icon.png --out ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon.png
+      - name: Sync Capacitor
+        run: npx cap sync
 
-          cat > ios/App/App/Assets.xcassets/AppIcon.appiconset/Contents.json << 'JSON'
+      - name: Setup app icon (after sync, before build)
+        run: |
+          # Override icon AFTER cap sync so we don't interfere with asset catalog generation
+          ICON_DIR="ios/App/App/Assets.xcassets/AppIcon.appiconset"
+          mkdir -p "$ICON_DIR"
+          sips -z 1024 1024 resources/icon.png --out "$ICON_DIR/AppIcon.png"
+
+          cat > "$ICON_DIR/Contents.json" << 'JSON'
           {
             "images": [
               {
@@ -51,14 +54,20 @@ jobs:
             }
           }
           JSON
-          echo "Icon ready:"
-          ls -la ios/App/App/Assets.xcassets/AppIcon.appiconset/
 
-      - name: Sync Capacitor
-        run: npx cap sync
+          # Verify all asset catalog Contents.json files are valid
+          echo "=== Asset catalog contents ==="
+          find ios/App/App/Assets.xcassets -name "Contents.json" -exec echo "--- {} ---" \; -exec cat {} \;
+          echo "=== Icon ready ==="
+          ls -la "$ICON_DIR/"
 
       - name: Build unsigned .app
         run: |
+          # Use the latest available Xcode
+          sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer 2>/dev/null || true
+          xcodebuild -version
+          swift --version
+
           cd "$GITHUB_WORKSPACE/ios/App"
 
           # SPM uses .xcodeproj, CocoaPods uses .xcworkspace
@@ -91,13 +100,19 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
             DEVELOPMENT_TEAM="" \
-            IPHONEOS_DEPLOYMENT_TARGET="16.0" \
+            IPHONEOS_DEPLOYMENT_TARGET="15.0" \
             ARCHS="arm64" \
             VALID_ARCHS="arm64" \
             2>&1 | tee build.log
           BUILD_EXIT=$?
           set +o pipefail
           echo "Build exit code: $BUILD_EXIT"
+
+          if [ $BUILD_EXIT -ne 0 ]; then
+            echo "=== BUILD FAILED - Extracting Swift errors ==="
+            grep -E "error:|fatal error:|warning:.*deprecated" build.log | tail -30
+            exit $BUILD_EXIT
+          fi
 
           APP_BUNDLE="build/Build/Products/Release-iphoneos/App.app"
           echo "=== App bundle contents ==="
@@ -106,10 +121,7 @@ jobs:
           # Check for executable
           if [ ! -f "$APP_BUNDLE/App" ]; then
             echo "⚠️ No executable found in .app bundle!"
-            echo "Build failed (Swift compilation). Checking build log for errors..."
-            grep -E "error:|fatal error:" build.log | tail -20
-            echo "Exiting with build failure code"
-            exit $BUILD_EXIT
+            exit 1
           fi
           echo "✅ Executable found"
 
@@ -150,7 +162,7 @@ jobs:
               <key>CFBundleInfoDictionaryVersion</key>
               <string>6.0</string>
               <key>MinimumOSVersion</key>
-              <string>16.0</string>
+              <string>15.0</string>
               <key>UILaunchStoryboardName</key>
               <string>LaunchScreen</string>
               <key>UIRequiredDeviceCapabilities</key>
