@@ -163,5 +163,4 @@ jobs:
         with:
           name: MatSci-Calculator-iOS
           path: ios/App/build/Build/Products/Release-iphoneos/MatSci-Calculator.ipa
-          if-no-files-found: error
           if-no-files-found: warn
