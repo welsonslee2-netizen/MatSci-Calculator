@@ -93,25 +93,81 @@ jobs:
             IPHONEOS_DEPLOYMENT_TARGET="15.0" \
             ARCHS="arm64" \
             VALID_ARCHS="arm64" \
+            INFOPLIST_FILE="App/Info.plist" \
             2>&1 | tee build.log
 
-          # Fix: Ensure Info.plist exists in .app bundle
+          echo "Build exit code: $?"
+
           APP_BUNDLE="build/Build/Products/Release-iphoneos/App.app"
-          if [ ! -f "$APP_BUNDLE/Info.plist" ]; then
-            echo "⚠️ Info.plist missing, searching..."
-            FOUND_PLIST=$(find build -name "Info.plist" -path "*App.build*" 2>/dev/null | head -1)
-            if [ -n "$FOUND_PLIST" ]; then
-              echo "Copying from: $FOUND_PLIST"
-              cp "$FOUND_PLIST" "$APP_BUNDLE/Info.plist"
-              echo "✅ Info.plist copied"
+          echo "=== App bundle contents ==="
+          ls -la "$APP_BUNDLE/"
+
+          echo "=== Info.plist check ==="
+          if [ -f "$APP_BUNDLE/Info.plist" ]; then
+            echo "Info.plist found, dumping CFBundleIdentifier:"
+            /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP_BUNDLE/Info.plist" 2>&1 || echo "Failed to read CFBundleIdentifier"
+          else
+            echo "⚠️ Info.plist missing from .app bundle!"
+
+            # Search for generated Info.plist in build intermediates
+            FOUND=$(find build -name "Info.plist" -path "*App.build*" 2>/dev/null | head -1)
+            if [ -n "$FOUND" ]; then
+              echo "Found intermediate Info.plist at: $FOUND"
+              cp "$FOUND" "$APP_BUNDLE/Info.plist"
             else
-              echo "Trying to generate minimal Info.plist..."
-              /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.welsonslee.matsci.calculator" "$APP_BUNDLE/Info.plist" 2>/dev/null || true
+              # Last resort: search all Info.plist in derived data
+              FOUND=$(find build -name "Info.plist" 2>/dev/null | head -1)
+              if [ -n "$FOUND" ]; then
+                echo "Fallback: using $FOUND"
+                cp "$FOUND" "$APP_BUNDLE/Info.plist"
+              else
+                # Generate a proper Info.plist from scratch
+                echo "Generating Info.plist from scratch..."
+                cat > "$APP_BUNDLE/Info.plist" << 'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleIdentifier</key>
+              <string>com.welsonslee.matsci.calculator</string>
+              <key>CFBundleName</key>
+              <string>MatSci Calculator</string>
+              <key>CFBundleDisplayName</key>
+              <string>MatSci Calculator</string>
+              <key>CFBundleVersion</key>
+              <string>1</string>
+              <key>CFBundleShortVersionString</key>
+              <string>1.0</string>
+              <key>CFBundleExecutable</key>
+              <string>App</string>
+              <key>CFBundlePackageType</key>
+              <string>APPL</string>
+              <key>CFBundleInfoDictionaryVersion</key>
+              <string>6.0</string>
+              <key>MinimumOSVersion</key>
+              <string>15.0</string>
+              <key>UILaunchStoryboardName</key>
+              <string>LaunchScreen</string>
+              <key>UIRequiredDeviceCapabilities</key>
+              <array>
+                  <string>arm64</string>
+              </array>
+              <key>UISupportedInterfaceOrientations</key>
+              <array>
+                  <string>UIInterfaceOrientationPortrait</string>
+              </array>
+          </dict>
+          </plist>
+          PLIST
+                echo "Info.plist generated"
+              fi
             fi
           fi
 
-          echo "=== App bundle contents ==="
-          ls -la "$APP_BUNDLE/"
+          # Final verification
+          echo "=== Final Info.plist verification ==="
+          plutil -lint "$APP_BUNDLE/Info.plist"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP_BUNDLE/Info.plist"
 
       - name: Package into .ipa
         run: |
@@ -132,12 +188,17 @@ jobs:
           fi
           echo "Found: $APP_BUNDLE"
 
+          # Verify Info.plist exists and is valid
           if [ ! -f "$APP_BUNDLE/Info.plist" ]; then
             echo "❌ Info.plist missing in $APP_BUNDLE"
             ls -la "$APP_BUNDLE/"
             exit 1
           fi
           echo "✅ Info.plist exists"
+
+          plutil -lint "$APP_BUNDLE/Info.plist"
+          echo "CFBundleIdentifier: $(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP_BUNDLE/Info.plist")"
+          echo "CFBundleExecutable: $(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP_BUNDLE/Info.plist" 2>/dev/null || echo 'MISSING')"
 
           mkdir -p "$PRODUCTS_DIR/Payload"
           cp -r "$APP_BUNDLE" "$PRODUCTS_DIR/Payload/"
