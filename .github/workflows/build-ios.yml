@@ -59,7 +59,8 @@ jobs:
 
       - name: Build unsigned .app
         run: |
-          cd ios/App
+          # Build from project root
+          cd "$GITHUB_WORKSPACE/ios/App"
 
           # SPM uses .xcodeproj, CocoaPods uses .xcworkspace
           if [ -f "App.xcworkspace" ]; then
@@ -73,14 +74,12 @@ jobs:
           SCHEMES=$(xcodebuild $BUILD_CMD -list 2>&1)
           echo "$SCHEMES"
 
-          # Detect scheme name (could be "App" or "MatSci Calculator")
+          # Detect scheme name
           SCHEME="App"
           if echo "$SCHEMES" | grep -q "MatSci Calculator"; then
             SCHEME="MatSci Calculator"
-            echo "Using scheme: $SCHEME"
-          else
-            echo "Using default scheme: $SCHEME"
           fi
+          echo "Using scheme: $SCHEME"
 
           xcodebuild $BUILD_CMD \
             -scheme "$SCHEME" \
@@ -96,29 +95,18 @@ jobs:
             VALID_ARCHS="arm64" \
             2>&1 | tee build.log
 
-          # === Fix: Ensure Info.plist exists in .app bundle ===
+          # Fix: Ensure Info.plist exists in .app bundle
           APP_BUNDLE="build/Build/Products/Release-iphoneos/App.app"
           if [ ! -f "$APP_BUNDLE/Info.plist" ]; then
-            echo "⚠️ Info.plist missing, copying from project source..."
-            # Try multiple possible locations
-            for SRC in \
-              "App/App/Info.plist" \
-              "App/Info.plist" \
-              "build/Build/Intermediates.noindex/App.build/Release-iphoneos/App.build/Info.plist"; do
-              if [ -f "$SRC" ]; then
-                echo "Found Info.plist at: $SRC"
-                cp "$SRC" "$APP_BUNDLE/Info.plist"
-                echo "✅ Info.plist copied"
-                break
-              fi
-            done
-
-            # If still missing, check if it's a compiled plist (binary)
-            if [ ! -f "$APP_BUNDLE/Info.plist" ]; then
-              echo "Searching for Info.plist in build directory..."
-              find build -name "Info.plist" -path "*App.build*" 2>/dev/null | head -5
-              # Try to generate from project settings
-              plutil -create "$APP_BUNDLE/Info.plist" 2>/dev/null || true
+            echo "⚠️ Info.plist missing, searching..."
+            FOUND_PLIST=$(find build -name "Info.plist" -path "*App.build*" 2>/dev/null | head -1)
+            if [ -n "$FOUND_PLIST" ]; then
+              echo "Copying from: $FOUND_PLIST"
+              cp "$FOUND_PLIST" "$APP_BUNDLE/Info.plist"
+              echo "✅ Info.plist copied"
+            else
+              echo "Trying to generate minimal Info.plist..."
+              /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.welsonslee.matsci.calculator" "$APP_BUNDLE/Info.plist" 2>/dev/null || true
             fi
           fi
 
@@ -127,43 +115,37 @@ jobs:
 
       - name: Package into .ipa
         run: |
-          PRODUCTS_DIR="ios/App/build/Build/Products/Release-iphoneos"
+          PRODUCTS_DIR="$GITHUB_WORKSPACE/ios/App/build/Build/Products/Release-iphoneos"
 
           if [ ! -d "$PRODUCTS_DIR" ]; then
-            echo "❌ Products directory not found: $PRODUCTS_DIR"
-            echo "=== Searching for .app bundles ==="
-            find ios/App/build -name "*.app" -type d 2>/dev/null || echo "No .app found anywhere"
+            echo "❌ Products directory not found"
             exit 1
           fi
 
           echo "=== Contents of products dir ==="
           ls -la "$PRODUCTS_DIR"
 
-          # Find the .app bundle (could be named App.app, MatSci Calculator.app, etc.)
           APP_BUNDLE=$(find "$PRODUCTS_DIR" -maxdepth 1 -name "*.app" -type d | head -1)
-
           if [ -z "$APP_BUNDLE" ]; then
-            echo "❌ No .app bundle found in $PRODUCTS_DIR"
+            echo "❌ No .app bundle found"
             exit 1
           fi
+          echo "Found: $APP_BUNDLE"
 
-          echo "Found app bundle: $APP_BUNDLE"
-
-          # Verify Info.plist exists
           if [ ! -f "$APP_BUNDLE/Info.plist" ]; then
             echo "❌ Info.plist missing in $APP_BUNDLE"
             ls -la "$APP_BUNDLE/"
             exit 1
           fi
+          echo "✅ Info.plist exists"
 
-          echo "✅ Info.plist found"
+          mkdir -p "$PRODUCTS_DIR/Payload"
+          cp -r "$APP_BUNDLE" "$PRODUCTS_DIR/Payload/"
           cd "$PRODUCTS_DIR"
-          mkdir -p Payload
-          cp -r "$APP_BUNDLE" Payload/
           zip -r MatSci-Calculator.ipa Payload/
           rm -rf Payload
 
-          echo "=== Verify IPA structure ==="
+          echo "=== Verify IPA ==="
           unzip -l MatSci-Calculator.ipa | head -20
 
       - name: Upload build log on failure
@@ -181,4 +163,5 @@ jobs:
         with:
           name: MatSci-Calculator-iOS
           path: ios/App/build/Build/Products/Release-iphoneos/MatSci-Calculator.ipa
+          if-no-files-found: error
           if-no-files-found: warn
