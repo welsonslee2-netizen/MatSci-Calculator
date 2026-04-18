@@ -33,51 +33,29 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync ios
 
-      - name: Create ExportOptions.plist for ad-hoc distribution
-        run: |
-          cat > ios/App/ExportOptions.plist << 'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>method</key>
-            <string>ad-hoc</string>
-            <key>compileBitcode</key>
-            <false/>
-            <key>stripSwiftSymbols</key>
-            <true/>
-            <key>thinning</key>
-            <string>&lt;none&gt;</string>
-          </dict>
-          </plist>
-          EOF
-
-      - name: Build and archive with Xcode (auto-signing)
+      - name: Build for generic iOS device (unsigned .app)
         run: |
           cd ios/App
           xcodebuild -workspace App.xcworkspace \
             -scheme App \
             -configuration Release \
-            -archivePath build/App.xcarchive \
-            -allowProvisioningUpdates \
-            -destination 'generic/platform=iOS' \
-            archive \
-            CODE_SIGN_STYLE=Automatic \
-            DEVELOPMENT_TEAM="${{ secrets.TEAM_ID }}"
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
 
-      - name: Export IPA
+      - name: Package .app into .ipa (manual zip method)
         run: |
-          cd ios/App
-          xcodebuild -exportArchive \
-            -archivePath build/App.xcarchive \
-            -exportOptionsPlist ExportOptions.plist \
-            -exportPath build/output \
-            -allowProvisioningUpdates \
-            DEVELOPMENT_TEAM="${{ secrets.TEAM_ID }}"
+          cd ios/App/build/Build/Products/Release-iphoneos
+          mkdir -p Payload
+          cp -r App.app Payload/
+          zip -r MatSci-Calculator.ipa Payload/
+          rm -rf Payload
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: MatSci-Calculator-iOS
-          path: ios/App/build/output/*.ipa
+          path: ios/App/build/Build/Products/Release-iphoneos/MatSci-Calculator.ipa
           if-no-files-found: error
