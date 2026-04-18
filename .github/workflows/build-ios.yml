@@ -59,7 +59,6 @@ jobs:
 
       - name: Build unsigned .app
         run: |
-          # Build from project root
           cd "$GITHUB_WORKSPACE/ios/App"
 
           # SPM uses .xcodeproj, CocoaPods uses .xcworkspace
@@ -81,6 +80,8 @@ jobs:
           fi
           echo "Using scheme: $SCHEME"
 
+          # Build and capture exit code properly (pipe through cat, not tee, to preserve exit code)
+          set -o pipefail
           xcodebuild $BUILD_CMD \
             -scheme "$SCHEME" \
             -configuration Release \
@@ -90,40 +91,44 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
             DEVELOPMENT_TEAM="" \
-            IPHONEOS_DEPLOYMENT_TARGET="15.0" \
+            IPHONEOS_DEPLOYMENT_TARGET="16.0" \
             ARCHS="arm64" \
             VALID_ARCHS="arm64" \
-            INFOPLIST_FILE="App/Info.plist" \
             2>&1 | tee build.log
-
-          echo "Build exit code: $?"
+          BUILD_EXIT=$?
+          set +o pipefail
+          echo "Build exit code: $BUILD_EXIT"
 
           APP_BUNDLE="build/Build/Products/Release-iphoneos/App.app"
           echo "=== App bundle contents ==="
-          ls -la "$APP_BUNDLE/"
+          ls -la "$APP_BUNDLE/" || echo "App bundle not found at expected path"
 
-          echo "=== Info.plist check ==="
+          # Check for executable
+          if [ ! -f "$APP_BUNDLE/App" ]; then
+            echo "⚠️ No executable found in .app bundle!"
+            echo "Build failed (Swift compilation). Checking build log for errors..."
+            grep -E "error:|fatal error:" build.log | tail -20
+            echo "Exiting with build failure code"
+            exit $BUILD_EXIT
+          fi
+          echo "✅ Executable found"
+
+          # Info.plist: check if it exists and is valid
           if [ -f "$APP_BUNDLE/Info.plist" ]; then
             echo "Info.plist found, dumping CFBundleIdentifier:"
-            /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP_BUNDLE/Info.plist" 2>&1 || echo "Failed to read CFBundleIdentifier"
+            /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP_BUNDLE/Info.plist" 2>&1
           else
             echo "⚠️ Info.plist missing from .app bundle!"
 
-            # Search for generated Info.plist in build intermediates
-            FOUND=$(find build -name "Info.plist" -path "*App.build*" 2>/dev/null | head -1)
+            # Search for Info.plist, EXCLUDE storyboard ones
+            FOUND=$(find build -name "Info.plist" -not -path "*storyboardc*" -not -path "*Assets.car*" 2>/dev/null | head -1)
             if [ -n "$FOUND" ]; then
-              echo "Found intermediate Info.plist at: $FOUND"
+              echo "Found Info.plist at: $FOUND"
               cp "$FOUND" "$APP_BUNDLE/Info.plist"
             else
-              # Last resort: search all Info.plist in derived data
-              FOUND=$(find build -name "Info.plist" 2>/dev/null | head -1)
-              if [ -n "$FOUND" ]; then
-                echo "Fallback: using $FOUND"
-                cp "$FOUND" "$APP_BUNDLE/Info.plist"
-              else
-                # Generate a proper Info.plist from scratch
-                echo "Generating Info.plist from scratch..."
-                cat > "$APP_BUNDLE/Info.plist" << 'PLIST'
+              # Generate a proper Info.plist from scratch
+              echo "Generating Info.plist from scratch..."
+              cat > "$APP_BUNDLE/Info.plist" << 'PLIST'
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
@@ -145,7 +150,7 @@ jobs:
               <key>CFBundleInfoDictionaryVersion</key>
               <string>6.0</string>
               <key>MinimumOSVersion</key>
-              <string>15.0</string>
+              <string>16.0</string>
               <key>UILaunchStoryboardName</key>
               <string>LaunchScreen</string>
               <key>UIRequiredDeviceCapabilities</key>
@@ -159,8 +164,7 @@ jobs:
           </dict>
           </plist>
           PLIST
-                echo "Info.plist generated"
-              fi
+              echo "Info.plist generated"
             fi
           fi
 
