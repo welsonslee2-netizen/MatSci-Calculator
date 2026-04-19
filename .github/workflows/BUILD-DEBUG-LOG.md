@@ -102,9 +102,34 @@
 
 ### Swift 代码修改
 - **不要用 awk/sed 修改 Swift 代码**——`{}` 嵌套、泛型、多行声明等语法太复杂
-- 直接覆盖整个文件是最安全的做法
+- **用 Python** 做大括号深度感知的精准删除最可靠
+- 直接覆盖整个文件是最安全的做法，但可能导致功能缺失（如黑屏）
 
 ### GitHub Actions 网络
 - github.com:443 在某些时段连接不稳定（21119ms timeout）
 - 失败后等 1-2 分钟重试通常可以成功
 - 也可以用 Git Data API（REST）绕过 git push
+
+---
+
+## 错误 #8 — 安装后黑屏
+
+- **时间**: 2026-04-19
+- **错误信息**: App 安装成功但打开后黑屏
+- **根因**: 为了修复编译错误 #4/#5，用 `printf` 覆盖了整个 `AppDelegate.swift` 为 Scene-based 版本（含 `configurationForConnecting` / `didDiscardSceneSessions`），但 **Capacitor 8 不是 Scene-based 的**——它使用传统 `UIWindow` + `didFinishLaunchingWithOptions`。覆盖后的 AppDelegate 没有创建 window 和 rootViewController，也没有调用 `ApplicationDelegateProxy`，导致 Capacitor WebView 完全没有初始化
+- **修复**: 不再覆盖整个文件，改用 Python 脚本精准删除有问题的 `continueUserActivity` 方法（大括号深度感知），保留 Capacitor 生成的其余所有代码
+- **教训**: 
+  - **不要用 printf 覆盖整个原生模板文件**——会丢失框架的关键初始化代码
+  - 只做最小化的精准修改（删除/修改单个方法）
+  - 如果不确定原始模板结构，先在 CI 中 dump 出完整内容再修改
+
+---
+
+## 错误 #9 — 图标白边
+
+- **时间**: 2026-04-19
+- **错误信息**: App 图标在桌面上显示白边
+- **根因**: `sips -z 1024 1024` 是裁剪（zoom/crop）而非缩放（resample），可能导致图片内容偏移
+- **修复**: 改用 `sips --resampleWidth 1024` 进行等比缩放，保持图片完整性
+- **注意**: 如果源图片 `resources/icon.png` 本身就有白色背景/边距，CI 无法修复，需要重新设计图标
+- **状态**: 部分解决（CI 端已优化，源图片质量需另行检查）

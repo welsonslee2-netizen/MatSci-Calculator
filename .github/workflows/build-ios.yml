@@ -36,9 +36,13 @@ jobs:
           # Override icon AFTER cap sync so we don't interfere with asset catalog generation
           ICON_DIR="ios/App/App/Assets.xcassets/AppIcon.appiconset"
           mkdir -p "$ICON_DIR"
-          sips -z 1024 1024 resources/icon.png --out "$ICON_DIR/AppIcon.png"
 
-          cat > "$ICON_DIR/Contents.json" << 'JSON'
+          # sips -z crops (zoom), sips -z 1024 1024 on a 1024x1024 image is safe.
+          # But we use --resampleWidth/Height to be safe for any input size.
+          sips --resampleWidth 1024 resources/icon.png --out "$ICON_DIR/AppIcon.png"
+
+          # Use Xcode 15+ single-size icon format (iOS 11+)
+          cat > "$ICON_DIR/Contents.json" << 'JSONEOF'
           {
             "images": [
               {
@@ -53,12 +57,10 @@ jobs:
               "version": 1
             }
           }
-          JSON
+          JSONEOF
 
-          # Verify all asset catalog Contents.json files are valid
-          echo "=== Asset catalog contents ==="
-          find ios/App/App/Assets.xcassets -name "Contents.json" -exec echo "--- {} ---" \; -exec cat {} \;
-          echo "=== Icon ready ==="
+          echo "=== Icon info ==="
+          sips -g all "$ICON_DIR/AppIcon.png" | head -10
           ls -la "$ICON_DIR/"
 
       - name: Fix AppDelegate.swift for Xcode 16.2 compatibility
@@ -70,28 +72,30 @@ jobs:
 
           # Capacitor 8 generates application(_:continue:restorationHandler:) which
           # does NOT exist in ApplicationDelegateProxy for Xcode 16.2 / Swift 5.10.
-          # Safest fix: rewrite the entire file with a known-good version.
-          # Use printf to avoid heredoc YAML indentation issues.
-          printf '%s\n' \
-            'import UIKit' \
-            'import Capacitor' \
-            '' \
-            '@UIApplicationMain' \
-            'class AppDelegate: UIResponder, UIApplicationDelegate {' \
-            '' \
-            '    var window: UIWindow?' \
-            '' \
-            '    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {' \
-            '        return true' \
-            '    }' \
-            '' \
-            '    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {' \
-            '        return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)' \
-            '    }' \
-            '' \
-            '    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {' \
-            '    }' \
-            '}' > "$AD_FILE"
+          # Use Python to precisely remove ONLY that method (brace-depth aware).
+          python3 -c "
+          import re
+          with open('$AD_FILE', 'r') as f:
+              lines = f.readlines()
+          out = []
+          skip = False
+          depth = 0
+          for line in lines:
+              if not skip:
+                  if re.search(r'func\s+application\s*\(.*continue\s+userActivity', line):
+                      skip = True
+                      depth = 0
+                      continue
+                  out.append(line)
+              else:
+                  depth += line.count('{') - line.count('}')
+                  if depth <= 0 and '}' in line:
+                      skip = False
+                      continue
+          with open('$AD_FILE', 'w') as f:
+              f.writelines(out)
+          print('Method removed successfully')
+          "
 
           echo "=== Patched AppDelegate.swift ==="
           cat "$AD_FILE"
