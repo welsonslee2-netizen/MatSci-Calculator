@@ -89,7 +89,7 @@ jobs:
           fi
           echo "Using scheme: $SCHEME"
 
-          # Build and capture exit code properly (pipe through cat, not tee, to preserve exit code)
+          # Build — pipe to tee so log is saved AND printed; set -o pipefail preserves exit code
           set -o pipefail
           xcodebuild $BUILD_CMD \
             -scheme "$SCHEME" \
@@ -103,16 +103,25 @@ jobs:
             IPHONEOS_DEPLOYMENT_TARGET="15.0" \
             ARCHS="arm64" \
             VALID_ARCHS="arm64" \
-            2>&1 | tee build.log
-          BUILD_EXIT=$?
+            2>&1 | tee build.log || true
           set +o pipefail
-          echo "Build exit code: $BUILD_EXIT"
 
-          if [ $BUILD_EXIT -ne 0 ]; then
-            echo "=== BUILD FAILED - Extracting Swift errors ==="
-            grep -E "error:|fatal error:|warning:.*deprecated" build.log | tail -30
-            exit $BUILD_EXIT
+          BUILD_EXIT=$(grep -c "BUILD FAILED" build.log || true)
+          if [ "$BUILD_EXIT" -gt 0 ]; then
+            echo ""
+            echo "========================================="
+            echo "  BUILD FAILED — Swift/Compile errors:"
+            echo "========================================="
+            grep -E "^.+error:.+$" build.log | head -40
+            echo ""
+            echo "=== GeneratedAssetSymbols context ==="
+            grep -B5 -A10 "GeneratedAssetSymbols" build.log | head -60
+            echo ""
+            echo "=== AppDelegate context ==="
+            grep -B3 -A10 "AppDelegate.swift.*error" build.log | head -40
+            exit 65
           fi
+          echo "Build exit code: 0"
 
           APP_BUNDLE="build/Build/Products/Release-iphoneos/App.app"
           echo "=== App bundle contents ==="
