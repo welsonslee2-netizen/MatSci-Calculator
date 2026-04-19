@@ -61,6 +61,24 @@ jobs:
           echo "=== Icon ready ==="
           ls -la "$ICON_DIR/"
 
+      - name: Fix AppDelegate.swift for Xcode 16.2 compatibility
+        run: |
+          AD_FILE="ios/App/App/AppDelegate.swift"
+          echo "=== Original AppDelegate.swift ==="
+          cat "$AD_FILE"
+          echo ""
+
+          # Capacitor 8 generates application(_:continue:restorationHandler:) with wrong API
+          # Xcode 16.2 / Swift 5.10 changed ApplicationDelegateProxy signature
+          # Fix: remove restorationHandler arg and use correct method
+          sed -i '' 's/return ApplicationDelegateProxy\.shared\.application(application, continue: userActivity, restorationHandler: restorationHandler)/return ApplicationDelegateProxy.shared.application(application, continue: userActivity)/g' "$AD_FILE"
+
+          # Also patch the line that declares the method signature if needed
+          sed -i '' 's/func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping \[UIUserActivityRestoring\]?) -> Bool/func application(_ application: UIApplication, continue userActivity: NSUserActivity) -> Bool/g' "$AD_FILE"
+
+          echo "=== Patched AppDelegate.swift ==="
+          cat "$AD_FILE"
+
       - name: Build unsigned .app
         run: |
           # Use the latest available Xcode
