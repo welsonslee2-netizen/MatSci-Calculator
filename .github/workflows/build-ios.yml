@@ -68,13 +68,22 @@ jobs:
           cat "$AD_FILE"
           echo ""
 
-          # Capacitor 8 generates application(_:continue:restorationHandler:) with wrong API
-          # Xcode 16.2 / Swift 5.10 changed ApplicationDelegateProxy signature
-          # Fix: remove restorationHandler arg and use correct method
-          sed -i '' 's/return ApplicationDelegateProxy\.shared\.application(application, continue: userActivity, restorationHandler: restorationHandler)/return ApplicationDelegateProxy.shared.application(application, continue: userActivity)/g' "$AD_FILE"
-
-          # Also patch the line that declares the method signature if needed
-          sed -i '' 's/func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping \[UIUserActivityRestoring\]?) -> Bool/func application(_ application: UIApplication, continue userActivity: NSUserActivity) -> Bool/g' "$AD_FILE"
+          # Capacitor 8 generates application(_:continue:restorationHandler:) which does NOT
+          # exist in ApplicationDelegateProxy for Xcode 16.2 / Swift 5.10.
+          # The proxy only has application(_:open:options:).
+          # Fix: remove the entire method body including its declaration.
+          #
+          # The method looks like:
+          #   func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping [UIUserActivityRestoring]?) -> Bool {
+          #       return ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
+          #   }
+          #
+          # Use awk to delete the function entirely (from its declaration line to the closing brace).
+          awk '
+            /func application\(.*continue userActivity.*restorationHandler/ { skip=1; next }
+            skip && /^\s*\}/ { skip=0; next }
+            !skip { print }
+          ' "$AD_FILE" > "$AD_FILE.tmp" && mv "$AD_FILE.tmp" "$AD_FILE"
 
           echo "=== Patched AppDelegate.swift ==="
           cat "$AD_FILE"
