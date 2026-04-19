@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#f4f7fb">
   <title>MatSci Calculator Lab</title>
   <meta
     name="description"
@@ -15,6 +18,31 @@
 </head>
 <body>
   <div class="app-shell">
+    <!-- 移动端 App Header（桌面端隐藏） -->
+    <header class="app-header">
+      <div class="app-header-brand">
+        <div class="app-header-logo">MS</div>
+        <h1 class="app-header-title">MatSci Calc</h1>
+      </div>
+      <div class="app-header-actions">
+        <button type="button" class="app-header-btn" id="lang-toggle-btn" aria-label="Switch Language">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span class="lang-label" id="lang-toggle-label">EN</span>
+        </button>
+      </div>
+      <!-- 语言切换下拉面板 -->
+      <div class="lang-dropdown" id="lang-dropdown">
+        <button type="button" class="lang-dropdown-item active" data-language="en">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          English
+        </button>
+        <button type="button" class="lang-dropdown-item" data-language="zh">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          中文
+        </button>
+      </div>
+    </header>
+
     <aside class="sidebar">
       <div class="brand-block">
         <div class="brand-mark">MS</div>
@@ -1457,14 +1485,38 @@
       </section>
 
       <nav class="mobile-nav" aria-label="Workspace navigation" data-i18n-aria-label="mobileNavAria">
-        <button class="mobile-nav-button active" type="button" data-page="home" data-i18n="navHome">Home</button>
-        <button class="mobile-nav-button" type="button" data-page="classic-calculator" data-i18n="navClassic">Classic Calculator</button>
-        <button class="mobile-nav-button" type="button" data-page="scientific-calculator" data-i18n="navScientific">Scientific Calculator</button>
-        <button class="mobile-nav-button" type="button" data-page="function-analysis" data-i18n="navAnalysis">Function Analysis</button>
-        <button class="mobile-nav-button" type="button" data-page="constants" data-i18n="navConstants">Constants Library</button>
-        <button class="mobile-nav-button" type="button" data-page="elements" data-i18n="navElements">Elements Library</button>
-        <button class="mobile-nav-button" type="button" data-page="strengthening" data-i18n="navStrengthening">Materials Strengthening</button>
-        <button class="mobile-nav-button" type="button" data-page="visual-lab" data-i18n="navVisual">Visual Lab</button>
+        <button class="mobile-nav-button active" type="button" data-page="home">
+          <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span>Home</span>
+        </button>
+        <button class="mobile-nav-button" type="button" data-page="classic-calculator">
+          <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10.01"/><line x1="12" y1="10" x2="12" y2="10.01"/><line x1="16" y1="10" x2="16" y2="10.01"/><line x1="8" y1="14" x2="8" y2="14.01"/><line x1="12" y1="14" x2="12" y2="14.01"/><line x1="16" y1="14" x2="16" y2="14.01"/><line x1="8" y1="18" x2="8" y2="18.01"/><line x1="12" y1="18" x2="12" y2="18.01"/><line x1="16" y1="18" x2="16" y2="18.01"/></svg>
+          <span>Calculator</span>
+        </button>
+        <button class="mobile-nav-button" type="button" data-page="scientific-calculator">
+          <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/><path d="M9.5 9.5l5 5"/><path d="M14.5 9.5l-5 5"/></svg>
+          <span>Scientific</span>
+        </button>
+        <button class="mobile-nav-button" type="button" data-page="function-analysis">
+          <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span>Analysis</span>
+        </button>
+        <button class="mobile-nav-button" type="button" data-page="constants">
+          <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span>Constants</span>
+        </button>
+        <button class="mobile-nav-button" type="button" data-page="elements">
+          <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="22" x2="12" y2="15.5"/><polyline points="22 8.5 12 15.5 2 8.5"/></svg>
+          <span>Elements</span>
+        </button>
+        <button class="mobile-nav-button" type="button" data-page="strengthening">
+          <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          <span>Strengthen</span>
+        </button>
+        <button class="mobile-nav-button" type="button" data-page="visual-lab">
+          <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>Visual</span>
+        </button>
       </nav>
 
       <footer class="footer-note" data-i18n="footerNote">

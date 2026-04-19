@@ -1,17 +1,17 @@
 :root {
   --bg: #f4f7fb;
   --bg-accent: #eef3f9;
-  --panel: rgba(255, 255, 255, 0.9);
+  --panel: rgba(255, 255, 255, 0.92);
   --panel-strong: #ffffff;
   --line: #d7e0ea;
   --line-strong: #b9c7d6;
-  --text: #173047;
+  --text: #1a2d3d;
   --muted: #60758a;
-  --accent: #1f5e87;
+  --accent: #1a6b9c;
   --accent-soft: #dceaf5;
   --accent-2: #1d8f7f;
   --warning: #c47828;
-  --danger: #b44c4c;
+  --danger: #c94444;
   --shadow: 0 18px 40px rgba(20, 52, 77, 0.08);
   --shadow-soft: 0 10px 22px rgba(20, 52, 77, 0.06);
   --radius-xl: 28px;
@@ -31,6 +31,8 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -54,6 +56,17 @@ body::before {
     linear-gradient(90deg, rgba(23, 48, 71, 0.03) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.5), transparent 82%);
+}
+
+/* 移动端移除背景网格，使用干净纯色 */
+@media (max-width: 1080px) {
+  body::before {
+    display: none;
+  }
+
+  body {
+    background: #f2f5f9;
+  }
 }
 
 a {
@@ -264,14 +277,15 @@ math-field.expression-input {
 }
 
 .toolbar-btn.primary {
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  background: linear-gradient(135deg, #1a6b9c, #20899c);
   color: white;
   border: none;
+  box-shadow: 0 3px 12px rgba(26, 107, 156, 0.2);
 }
 
 .toolbar-btn.primary:hover {
-  background: linear-gradient(135deg, #1a4f73, #17806e);
-  box-shadow: 0 4px 12px rgba(31, 94, 135, 0.25);
+  background: linear-gradient(135deg, #155d8a, #1b7a8c);
+  box-shadow: 0 4px 14px rgba(26, 107, 156, 0.28);
 }
 
 .toolbar-btn span {
@@ -317,8 +331,8 @@ input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: rgba(31, 94, 135, 0.45);
-  box-shadow: 0 0 0 4px rgba(31, 94, 135, 0.12);
+  border-color: rgba(26, 107, 156, 0.45);
+  box-shadow: 0 0 0 4px rgba(26, 107, 156, 0.1);
 }
 
 textarea {
@@ -330,6 +344,92 @@ textarea {
   display: grid;
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   min-height: 100vh;
+}
+
+/* App Header 默认隐藏（移动端通过媒体查询显示） */
+.app-header {
+  display: none;
+}
+
+/* App Header 右上角按钮 */
+.app-header-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-header-btn:active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: rgba(31, 94, 135, 0.2);
+}
+
+.app-header-btn .lang-label {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 语言切换下拉面板 */
+.lang-dropdown {
+  position: absolute;
+  top: calc(100% - 2px);
+  right: 0.7rem;
+  z-index: 200;
+  min-width: 140px;
+  padding: 0.3rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(20, 52, 77, 0.15), 0 2px 8px rgba(20, 52, 77, 0.08);
+  border: 1px solid rgba(215, 224, 234, 0.7);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px) scale(0.95);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.lang-dropdown.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.lang-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lang-dropdown-item:active {
+  background: var(--accent-soft);
+}
+
+.lang-dropdown-item.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
 }
 
 .sidebar {
@@ -358,11 +458,11 @@ textarea {
   width: 64px;
   height: 64px;
   border-radius: 18px;
-  background: linear-gradient(145deg, #1f5e87, #2f8090);
+  background: linear-gradient(145deg, #1a6b9c, #20899c);
   color: #fff;
   font-weight: 700;
   font-size: 1.2rem;
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 4px 16px rgba(26, 107, 156, 0.25);
 }
 
 .eyebrow {
@@ -432,9 +532,9 @@ textarea {
 }
 
 .lang-button.active {
-  background: linear-gradient(145deg, #1f5e87, #2b7691);
+  background: linear-gradient(145deg, #1a6b9c, #20899c);
   color: #fff;
-  box-shadow: 0 8px 18px rgba(31, 94, 135, 0.18);
+  box-shadow: 0 4px 12px rgba(26, 107, 156, 0.2);
 }
 
 .nav-link {
@@ -456,11 +556,12 @@ textarea {
 .panel,
 .hero-card,
 .module-card {
-  border: 1px solid rgba(215, 224, 234, 0.9);
+  border: 1px solid rgba(215, 224, 234, 0.7);
   border-radius: var(--radius-lg);
   background: var(--panel);
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 2px 12px rgba(20, 52, 77, 0.04);
   backdrop-filter: blur(12px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .sidebar-card {
@@ -524,8 +625,8 @@ textarea {
 }
 
 .sub-tab-button.active {
-  background: linear-gradient(145deg, rgba(31, 94, 135, 0.12), rgba(29, 143, 127, 0.12));
-  border-color: rgba(31, 94, 135, 0.22);
+  background: rgba(26, 107, 156, 0.1);
+  border-color: rgba(26, 107, 156, 0.2);
   color: var(--accent);
 }
 
@@ -606,8 +707,8 @@ textarea {
   position: relative;
   overflow: hidden;
   background:
-    linear-gradient(140deg, rgba(31, 94, 135, 0.96), rgba(47, 128, 144, 0.92)),
-    linear-gradient(180deg, #235775, #1d8f7f);
+    linear-gradient(140deg, rgba(26, 107, 156, 0.96), rgba(32, 137, 156, 0.92)),
+    linear-gradient(180deg, #1a6b9c, #1d8f7f);
   color: #f9fcff;
 }
 
@@ -690,7 +791,7 @@ textarea {
   width: 48px;
   height: 48px;
   border-radius: 14px;
-  background: var(--accent-soft);
+  background: rgba(26, 107, 156, 0.1);
   color: var(--accent);
   font-family: var(--font-mono);
   font-weight: 600;
@@ -719,9 +820,13 @@ textarea {
 }
 
 .button.primary {
-  background: linear-gradient(145deg, #1f5e87, #2b7691);
+  background: linear-gradient(145deg, #1a6b9c, #20899c);
   color: #fff;
-  box-shadow: 0 12px 24px rgba(31, 94, 135, 0.18);
+  box-shadow: 0 4px 16px rgba(26, 107, 156, 0.25);
+}
+
+.button.primary:active {
+  transform: scale(0.97);
 }
 
 .button.secondary {
@@ -933,9 +1038,13 @@ textarea {
 }
 
 .keypad-button.eval {
-  background: linear-gradient(145deg, #1f5e87, #2b7691);
+  background: linear-gradient(145deg, #1a6b9c, #20899c);
   color: #fff;
-  box-shadow: 0 12px 24px rgba(31, 94, 135, 0.16);
+  box-shadow: 0 4px 16px rgba(26, 107, 156, 0.25);
+}
+
+.keypad-button.eval:active {
+  transform: scale(0.95);
 }
 
 .keypad-button.span-2 {
@@ -998,8 +1107,8 @@ textarea {
   margin-top: 0.8rem;
   padding: 1rem 1.1rem;
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(248, 251, 254, 0.9), rgba(238, 245, 251, 0.95));
-  border: 1px solid rgba(215, 224, 234, 0.88);
+  background: linear-gradient(135deg, rgba(26, 107, 156, 0.06), rgba(29, 143, 127, 0.06));
+  border: 1px solid rgba(215, 224, 234, 0.6);
 }
 
 .result-value {
@@ -1287,7 +1396,7 @@ textarea {
   width: 64px;
   height: 64px;
   border-radius: 18px;
-  background: var(--accent-soft);
+  background: rgba(26, 107, 156, 0.1);
   color: var(--accent);
   font-size: 1.55rem;
   font-weight: 700;
@@ -1344,8 +1453,8 @@ textarea {
 }
 
 .tab-button.active {
-  background: linear-gradient(145deg, rgba(31, 94, 135, 0.12), rgba(29, 143, 127, 0.12));
-  border-color: rgba(31, 94, 135, 0.22);
+  background: rgba(26, 107, 156, 0.1);
+  border-color: rgba(26, 107, 156, 0.2);
   color: var(--accent);
 }
 
@@ -1620,109 +1729,6 @@ textarea {
   }
 }
 
-@media (max-width: 1080px) {
-  .app-shell {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar {
-    position: relative;
-    height: auto;
-    border-right: none;
-    border-bottom: 1px solid rgba(215, 224, 234, 0.9);
-  }
-
-  .sidebar-nav {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-
-  .language-switcher {
-    width: fit-content;
-  }
-
-  .sidebar-card {
-    margin-top: 0;
-  }
-
-  .hero-grid,
-  .calculator-layout,
-  .element-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 820px) {
-  .main-content {
-    padding: 1.2rem;
-  }
-
-  .module-card-grid,
-  .tool-card-grid,
-  .visual-charts,
-  .field-grid.two-column,
-  .field-grid.three-column {
-    grid-template-columns: 1fr;
-  }
-
-  .classic-keypad {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  /* 在移动端，调整跨列按钮 */
-  .keypad-button.span-2 {
-    grid-column: span 2;
-  }
-
-  .keypad-button.span-6 {
-    grid-column: span 3; /* 在 3 列布局中占据全部宽度 */
-  }
-
-  .hero-card,
-  .panel,
-  .module-card {
-    padding: 1rem;
-  }
-
-  .section-heading,
-  .panel-heading-row,
-  .result-banner,
-  .constant-head,
-  .constant-actions,
-  .detail-actions,
-  .compare-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-
-@media (max-width: 560px) {
-  .brand-block {
-    grid-template-columns: 52px 1fr;
-  }
-
-  .brand-mark {
-    width: 52px;
-    height: 52px;
-  }
-
-  .nav-link {
-    width: 100%;
-  }
-
-  .metric-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .keypad-button.span-6 {
-    grid-column: span 3;
-  }
-
-  .main-content {
-    padding: 0.95rem;
-  }
-}
-
 html,
 body {
   height: 100%;
@@ -1902,29 +1908,68 @@ body {
 @media (max-width: 1080px) {
   .app-shell {
     grid-template-columns: 1fr;
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
   }
 
+  /* ======== 隐藏桌面侧边栏，显示移动端 App Header ======== */
   .sidebar {
+    display: none !important;
+  }
+
+  .app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     position: relative;
-    top: auto;
-    height: auto;
-    gap: 1rem;
-    padding: 1rem 1rem 0.85rem;
-    overflow: visible;
+    padding: 0.5rem 0.75rem;
+    padding-top: calc(0.5rem + env(safe-area-inset-top));
+    background: rgba(250, 252, 255, 0.94);
+    backdrop-filter: blur(16px);
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.06);
+    z-index: 100;
+    flex-shrink: 0;
   }
 
-  .sidebar-nav-block,
-  .sidebar-card {
-    display: none;
+  .app-header-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
 
-  .brand-copy {
-    display: none;
+  .app-header-logo {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: linear-gradient(145deg, #1f5e87, #2f8090);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.68rem;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(31, 94, 135, 0.2);
+  }
+
+  .app-header-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .app-header-actions {
+    flex-shrink: 0;
+    position: relative;
   }
 
   .main-content {
-    padding: 0.9rem 0.9rem calc(5rem + env(safe-area-inset-bottom)) 0.9rem;
+    padding: 0.8rem 0.8rem calc(4.2rem + env(safe-area-inset-bottom));
+    height: auto;
+    min-height: 0;
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .page-section {
@@ -1938,27 +1983,73 @@ body {
     grid-template-columns: 1fr;
   }
 
+  /* ======== 原生 App 风格底部 Tab Bar ======== */
   .mobile-nav {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(92px, 1fr);
-    gap: 0.45rem;
-    overflow-x: auto;
-    position: sticky;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    position: fixed;
+    left: 0;
+    right: 0;
     bottom: 0;
-    z-index: 6;
-    padding: 0.55rem 0.2rem calc(0.55rem + env(safe-area-inset-bottom));
-    border: 1px solid rgba(215, 224, 234, 0.92);
-    border-radius: 22px;
-    background: rgba(250, 252, 255, 0.9);
-    backdrop-filter: blur(18px);
-    box-shadow: var(--shadow-soft);
+    z-index: 100;
+    padding: 0.25rem 0.15rem calc(0.25rem + env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(24px) saturate(180%);
+    border-top: 0.5px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 -1px 20px rgba(0, 0, 0, 0.04);
   }
 
   .mobile-nav-button {
-    min-height: 46px;
-    padding: 0.6rem 0.8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.12rem;
+    min-height: auto;
+    padding: 0.22rem 0.05rem;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #9ca8b4;
+    font-size: 0.55rem;
+    font-weight: 600;
     white-space: nowrap;
+    min-width: 0;
+    flex: 1;
+    transition: color 0.2s ease;
+    position: relative;
+  }
+
+  .mobile-nav-icon {
+    width: 21px;
+    height: 21px;
+    flex-shrink: 0;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .mobile-nav-button.active {
+    color: var(--accent);
+  }
+
+  .mobile-nav-button.active .mobile-nav-icon {
+    transform: scale(1.08);
+  }
+
+  .mobile-nav-button.active::before {
+    content: "";
+    position: absolute;
+    top: -0.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 18px;
+    height: 2.5px;
+    border-radius: 999px;
+    background: var(--accent);
+  }
+
+  .mobile-nav-button:active {
+    opacity: 0.55;
   }
 
   .panel-scroll-region {
@@ -1968,64 +2059,382 @@ body {
 
 @media (max-width: 820px) {
   .page-section {
-    gap: 1rem;
+    gap: 0.9rem;
   }
 
   .tab-row {
     flex-wrap: nowrap;
     overflow-x: auto;
     padding-bottom: 0.1rem;
+    -webkit-overflow-scrolling: touch;
   }
 
   .tab-button {
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .module-card-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+
+  .module-card {
+    min-height: auto;
+    padding: 0.85rem;
   }
 
   .visual-panel-stack .plot-frame,
   .analysis-plot-panel .plot-frame,
   .plot-frame {
-    min-height: 300px;
+    min-height: 260px;
   }
 
+  /* ======== 计算器键盘不遮挡 ======== */
+  .classic-keypad {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .keypad-button {
+    min-height: 46px;
+    padding: 0.5rem 0.3rem;
+    font-size: 0.9rem;
+    border-radius: 12px;
+  }
+
+  .scientific-keypad {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.4rem;
+    padding: 0.6rem;
+  }
+
+  .keypad-button.span-2 {
+    grid-column: span 2;
+  }
+
+  .keypad-button.span-4 {
+    grid-column: span 2;
+  }
+
+  .keypad-button.span-6 {
+    grid-column: span 4;
+  }
+
+  /* 表达式输入框更紧凑 */
+  math-field.classic-expression-input {
+    min-height: 52px !important;
+    padding: 0.7rem 0.85rem !important;
+    font-size: 1.1rem !important;
+    border-radius: 14px !important;
+  }
+
+  math-field.expression-input {
+    min-height: 56px !important;
+    padding: 0.65rem 0.85rem !important;
+    font-size: 1rem !important;
+  }
+
+  /* 经典计算器布局垂直堆叠 */
+  .classic-layout {
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+  }
+
+  .classic-display-card {
+    padding: 0.9rem;
+    border-radius: 14px;
+  }
+
+  /* 结果栏紧凑化 */
+  .result-banner {
+    padding: 0.75rem 0.85rem;
+    border-radius: 14px;
+    margin-top: 0.6rem;
+  }
+
+  .result-value {
+    font-size: clamp(1.3rem, 5vw, 1.8rem);
+  }
+
+  .classic-result-value {
+    font-size: clamp(1.6rem, 5vw, 2rem);
+  }
+
+  /* Home 页 hero 网格单列 */
+  .hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-card {
+    padding: 1.1rem;
+    border-radius: 16px;
+  }
+
+  /* 粘性操作区 */
   .sticky-actions {
     position: sticky;
     bottom: -0.2rem;
     z-index: 2;
-    margin-top: 0.8rem;
-    padding-top: 0.75rem;
+    margin-top: 0.6rem;
+    padding-top: 0.6rem;
     padding-bottom: 0.2rem;
     background: linear-gradient(180deg, rgba(244, 247, 251, 0), rgba(244, 247, 251, 0.92) 36%, rgba(244, 247, 251, 1) 100%);
+  }
+
+  /* 底部间距确保 Tab Bar 不遮挡 */
+  .main-content {
+    padding: 0.7rem 0.7rem calc(4.5rem + env(safe-area-inset-bottom));
+  }
+
+  /* 工具栏更紧凑 */
+  .formula-toolbar {
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+  }
+
+  .toolbar-btn {
+    padding: 0.4rem 0.65rem;
+    font-size: 0.78rem;
+    border-radius: 8px;
+  }
+
+  /* 移动端面板视觉提升 */
+  .panel, .feature-panel {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(215, 224, 234, 0.55);
+    box-shadow: 0 1px 8px rgba(20, 52, 77, 0.04);
+  }
+
+  .module-card {
+    border-color: rgba(215, 224, 234, 0.55);
+    box-shadow: 0 1px 8px rgba(20, 52, 77, 0.04);
+  }
+
+  .module-card:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 4px rgba(20, 52, 77, 0.06);
+  }
+
+  /* 元素网格紧凑 */
+  .elements-grid {
+    grid-template-columns: repeat(auto-fit, minmax(85px, 1fr));
+    gap: 0.45rem;
+  }
+
+  .element-tile {
+    padding: 0.55rem;
+    border-radius: 12px;
+  }
+
+  .element-symbol {
+    font-size: 1.2rem;
+  }
+
+  .element-name {
+    font-size: 0.72rem;
+  }
+
+  /* 函数分析子标签更紧凑 */
+  .analysis-sub-tabs {
+    gap: 0.3rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .sub-tab-button {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.8rem;
+    border-radius: 8px;
+  }
+
+  /* 场景卡网格紧凑 */
+  .tool-card-grid,
+  .visual-charts {
+    gap: 0.7rem;
+  }
+
+  /* 段落间距收紧 */
+  .panel-heading-row h3 {
+    font-size: 1rem;
+  }
+
+  .panel {
+    padding: 0.9rem;
+    border-radius: 14px;
+  }
+
+  .feature-panel {
+    padding: 0.9rem;
   }
 }
 
 @media (max-width: 560px) {
-  .sidebar {
-    padding: 0.9rem 0.8rem 0.7rem;
-  }
-
   .main-content {
-    padding: 0.7rem 0.7rem calc(5rem + env(safe-area-inset-bottom));
+    padding: 0.55rem 0.55rem calc(4.2rem + env(safe-area-inset-bottom));
   }
 
-  .language-switcher {
-    padding: 0.72rem 0.85rem;
+  .app-header {
+    padding: 0.4rem 0.6rem;
+    padding-top: calc(0.4rem + env(safe-area-inset-top));
   }
 
-  .mobile-nav {
+  .app-header-logo {
+    width: 28px;
+    height: 28px;
+    font-size: 0.62rem;
+    border-radius: 8px;
+  }
+
+  .app-header-title {
+    font-size: 0.92rem;
+  }
+
+  .app-header-btn {
+    padding: 0.3rem 0.55rem;
+    font-size: 0.68rem;
+  }
+
+  .lang-dropdown {
+    right: 0.5rem;
+    min-width: 130px;
+  }
+
+  /* 模块卡片网格单列 */
+  .module-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* 指标卡片单列 */
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .metric-card {
+    padding: 0.7rem;
+    border-radius: 12px;
+  }
+
+  .metric-value {
+    font-size: 1.25rem;
+  }
+
+  /* 键盘进一步紧凑 */
+  .keypad-button {
+    min-height: 42px;
+    font-size: 0.85rem;
+    border-radius: 10px;
+  }
+
+  .classic-keypad {
     gap: 0.35rem;
-    padding: 0.45rem 0.15rem calc(0.5rem + env(safe-area-inset-bottom));
+  }
+
+  .scientific-keypad {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.3rem;
+  }
+
+  /* Tab Bar 图标和文字缩小 */
+  .mobile-nav-icon {
+    width: 20px;
+    height: 20px;
   }
 
   .mobile-nav-button {
-    min-height: 44px;
-    font-size: 0.78rem;
+    font-size: 0.55rem;
+    gap: 0.1rem;
+    padding: 0.2rem 0;
   }
 
-  .metric-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .mobile-nav {
+    padding: 0.2rem 0.1rem calc(0.2rem + env(safe-area-inset-bottom));
+  }
+
+  /* 面板和卡片进一步紧凑 */
+  .panel, .feature-panel {
+    padding: 0.75rem;
+    border-radius: 12px;
+  }
+
+  .module-card {
+    padding: 0.75rem;
+    border-radius: 12px;
+  }
+
+  /* 输入框紧凑 */
+  input, select, textarea {
+    padding: 0.6rem 0.75rem;
+    border-radius: 10px;
+  }
+
+  /* 库工具栏紧凑 */
+  .library-toolbar {
+    gap: 0.6rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .library-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.7rem;
+  }
+
+  .constant-card, .compare-slot, .stat-card {
+    padding: 0.7rem;
+    border-radius: 12px;
+  }
+
+  /* 历史条目紧凑 */
+  .history-item {
+    padding: 0.7rem;
+    border-radius: 10px;
+  }
+
+  /* 图表更矮 */
+  .plot-frame {
+    min-height: 220px;
+    border-radius: 12px;
+  }
+
+  /* 按钮紧凑 */
+  .button {
+    min-height: 38px;
+    padding: 0.6rem 0.85rem;
+    border-radius: 10px;
+    font-size: 0.88rem;
+  }
+
+  /* 表格紧凑 */
+  .summary-table th,
+  .summary-table td {
+    padding: 0.5rem 0.15rem;
+    font-size: 0.82rem;
+  }
+
+  /* 元素网格进一步紧凑 */
+  .elements-grid {
+    grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+    gap: 0.35rem;
+  }
+
+  .element-tile {
+    padding: 0.4rem;
+    border-radius: 10px;
+  }
+
+  .element-symbol {
+    font-size: 1rem;
+  }
+
+  .element-name {
+    font-size: 0.65rem;
+  }
+
+  .element-number {
+    font-size: 0.68rem;
+  }
+
+  .element-structure {
+    font-size: 0.65rem;
   }
 }

@@ -1386,6 +1386,15 @@
       button.classList.toggle("active", button.dataset.language === state.language);
     });
 
+    // 同步移动端语言下拉面板的 active 状态和 Header 标签
+    Utils.qsa(".lang-dropdown-item").forEach(function (item) {
+      item.classList.toggle("active", item.dataset.language === state.language);
+    });
+    var langToggleLabel = getById("lang-toggle-label");
+    if (langToggleLabel) {
+      langToggleLabel.textContent = state.language === "zh" ? "中" : "EN";
+    }
+
     syncPageNavigation();
 
     const calcExpression = getById("calc-expression");
@@ -2873,6 +2882,7 @@
   }
 
   function bindEvents() {
+    // 桌面端语言切换
     getById("language-switcher").addEventListener("click", function (event) {
       const button = event.target.closest("[data-language]");
       if (!button || button.dataset.language === state.language) {
@@ -2881,6 +2891,45 @@
       state.language = button.dataset.language;
       applyLanguage();
     });
+
+    // 移动端语言切换（下拉面板）
+    var langToggleBtn = getById("lang-toggle-btn");
+    var langDropdown = getById("lang-dropdown");
+    var langToggleLabel = getById("lang-toggle-label");
+
+    if (langToggleBtn && langDropdown) {
+      // 点击按钮开关下拉面板
+      langToggleBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        langDropdown.classList.toggle("open");
+      });
+
+      // 选择语言
+      langDropdown.addEventListener("click", function (e) {
+        var item = e.target.closest("[data-language]");
+        if (!item || item.dataset.language === state.language) {
+          langDropdown.classList.remove("open");
+          return;
+        }
+        state.language = item.dataset.language;
+        // 更新按钮上的标签
+        if (langToggleLabel) {
+          langToggleLabel.textContent = state.language === "zh" ? "中" : "EN";
+        }
+        applyLanguage();
+        langDropdown.classList.remove("open");
+      });
+
+      // 点击其他区域关闭下拉
+      document.addEventListener("click", function () {
+        langDropdown.classList.remove("open");
+      });
+
+      // 初始化按钮标签
+      if (langToggleLabel) {
+        langToggleLabel.textContent = state.language === "zh" ? "中" : "EN";
+      }
+    }
 
     document.addEventListener("click", function (event) {
       const trigger = event.target.closest("[data-page], [data-page-link]");
